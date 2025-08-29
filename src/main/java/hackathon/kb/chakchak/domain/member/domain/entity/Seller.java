@@ -14,11 +14,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @DiscriminatorValue("SELLER")
 @Getter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@NoArgsConstructor @AllArgsConstructor @SuperBuilder
 public class Seller extends Member {
 
 	@OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)

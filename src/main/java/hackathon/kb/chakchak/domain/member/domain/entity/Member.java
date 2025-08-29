@@ -5,14 +5,15 @@ import hackathon.kb.chakchak.domain.member.domain.enums.SocialType;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "member")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "inheritance_type", discriminatorType = DiscriminatorType.STRING)
 @Getter
-@NoArgsConstructor @AllArgsConstructor @Builder
-public class Member extends BaseEntity {
+@NoArgsConstructor @AllArgsConstructor @SuperBuilder(toBuilder = true)
+public abstract class Member extends BaseEntity {
 
 	@Id
 	@Column(name = "member_id")

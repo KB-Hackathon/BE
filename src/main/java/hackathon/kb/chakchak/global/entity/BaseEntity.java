@@ -1,5 +1,7 @@
 package hackathon.kb.chakchak.global.entity;
 
+import static lombok.AccessLevel.*;
+
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -10,10 +12,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = PROTECTED)
+@SuperBuilder(toBuilder = true)
 public abstract class BaseEntity {
 
 	@CreatedDate
