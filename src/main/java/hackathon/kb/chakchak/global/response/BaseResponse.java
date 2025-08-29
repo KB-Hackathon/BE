@@ -1,6 +1,5 @@
 package hackathon.kb.chakchak.global.response;
 
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 
 import lombok.Builder;

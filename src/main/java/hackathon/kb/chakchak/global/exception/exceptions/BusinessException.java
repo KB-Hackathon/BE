@@ -1,7 +1,5 @@
 package hackathon.kb.chakchak.global.exception.exceptions;
 
-import org.springframework.http.HttpStatus;
-
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import lombok.Getter;
 
