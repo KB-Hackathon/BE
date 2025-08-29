@@ -1,8 +1,10 @@
 package hackathon.kb.chakchak.domain.product.domain.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
+import hackathon.kb.chakchak.domain.order.domain.entity.Order;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
@@ -17,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,7 +31,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @Table(name = "product")
-@AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends BaseEntity {
 
 	@Id
@@ -39,6 +43,9 @@ public class Product extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seller_id")
 	private Seller seller;
+
+	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+	private List<Order> orders;
 
 	@Column(nullable = false)
 	private Long endCaptureId;

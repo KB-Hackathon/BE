@@ -1,14 +1,19 @@
 package hackathon.kb.chakchak.domain.order.domain.entity;
 
+import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
 import hackathon.kb.chakchak.domain.order.domain.enums.OrderStatus;
+import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Builder
-@Table(name = "order")
+@Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {
@@ -29,11 +34,20 @@ public class Order extends BaseEntity {
 	@Column(name = "order_id")
 	private Long id;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "buyer_id")
+	private Buyer buyer;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "product_id")
+	private Product product;
+
 	@Column(nullable = false)
 	private Short quantity;
 
-	@Column(nullable = false)
-	private String transactionId;
+	// Todo: ledger 생성 후 추가
+	// @Column(nullable = false)
+	// private String transactionId;
 
 	private Boolean isSent;
 
