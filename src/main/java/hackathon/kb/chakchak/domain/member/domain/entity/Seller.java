@@ -2,6 +2,7 @@ package hackathon.kb.chakchak.domain.member.domain.entity;
 
 import java.util.List;
 
+import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.domain.review.domain.entity.Review;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -24,6 +25,9 @@ public class Seller extends Member {
 
 	@OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)
 	private List<Review> reviews;
+
+	@OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)
+	private List<Product> products;
 
 	@Column(length = 20)
 	private String bizNo; 					// (seller) 사업자등록번호
