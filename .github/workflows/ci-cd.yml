@@ -66,11 +66,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.SECRET_KEY }}
           aws-region: ${{  secrets.REGION }}
 
-      # S3에 Docker Compose 파일 업로드
-      - name: Upload Docker Compose to S3
-        run: |
-          aws s3 cp docker-compose.yml s3://${{ secrets.BUCKET_NAME }}/docker-compose.yml --region ${{ secrets.REGION }}
-
       # ASG 재시작
       - name: Trigger ASG Rolling Update
         run: |
