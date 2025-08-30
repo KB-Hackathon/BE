@@ -1,3 +1,17 @@
 spring:
   application:
     name: chakchak
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/chakchak?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: iuoo856963
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # 개발환경에서는 update, 운영에서는 validate 추천
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
