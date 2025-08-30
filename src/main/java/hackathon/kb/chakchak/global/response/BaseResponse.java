@@ -3,7 +3,9 @@ package hackathon.kb.chakchak.global.response;
 import org.springframework.http.HttpStatus;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 @Builder
 public class BaseResponse<T> {
 	private final String code;
