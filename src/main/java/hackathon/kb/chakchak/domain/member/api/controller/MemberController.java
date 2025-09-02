@@ -1,5 +1,6 @@
 package hackathon.kb.chakchak.domain.member.api.controller;
 
+import hackathon.kb.chakchak.domain.jwt.filter.MemberPrincipal;
 import hackathon.kb.chakchak.domain.member.api.dto.res.MemberProfileResponse;
 import hackathon.kb.chakchak.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +18,9 @@ public class MemberController {
     private final MemberService memberService;
 
     // 로그인한 사옹자 정보 가져오기
-//    @GetMapping("/me")
-//    public ResponseEntity<MemberProfileResponse> getMyProfile(@AuthenticationPrincipal Long sub) {
-//        Long memberId = Long.valueOf(sub);
-//        return ResponseEntity.ok(memberService.getMyProfile(memberId));
-//    }
-
     @GetMapping("/me")
-    public ResponseEntity<MemberProfileResponse> getMyProfile(@AuthenticationPrincipal Long memberId) {
+    public ResponseEntity<MemberProfileResponse> getMyProfile(@AuthenticationPrincipal MemberPrincipal principal) {
+        Long memberId = principal.getId();
         return ResponseEntity.ok(memberService.getMyProfile(memberId));
     }
 
