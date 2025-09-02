@@ -10,8 +10,21 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # 개발환경에서는 update, 운영에서는 validate 추천
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         show_sql: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    log-topic: ${KAFKA_LOG_TOPIC}
+
+    # Producer 설정 (String key, JSON value)
+    producer:
+      acks: all
+      retries: 5
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false  # 수신 측 타입 헤더 미포함(호환성)
