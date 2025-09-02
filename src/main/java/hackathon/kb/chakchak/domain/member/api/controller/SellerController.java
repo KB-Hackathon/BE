@@ -23,9 +23,9 @@ public class SellerController {
     @PostMapping("/register")
     public ResponseEntity<BizRegisterResponse> register(
             @Valid @RequestBody BizRegisterRequest req
-            /// @AuthenticationPrincipal CustomUser customUser 추가
+            // todo @AuthenticationPrincipal CustomUser customUser 추가
     ) {
-        Seller saved = sellerService.updateSellerFromApick(req.getBizNo(), 4L); /// customUser 정보 받아오도록 수정
+        Seller saved = sellerService.updateSellerFromApick(req.getBizNo(), 4L); /// todo customUser 정보 받아오도록 수정
         return ResponseEntity.ok(BizRegisterResponse.from(saved));
     }
 }
