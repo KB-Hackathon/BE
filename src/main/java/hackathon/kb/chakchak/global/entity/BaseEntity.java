@@ -4,6 +4,7 @@ import static lombok.AccessLevel.*;
 
 import java.time.LocalDateTime;
 
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -30,6 +31,7 @@ public abstract class BaseEntity {
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
+	@Builder.Default
 	@Column(nullable = false)
 	private Boolean isDeleted = false;
 

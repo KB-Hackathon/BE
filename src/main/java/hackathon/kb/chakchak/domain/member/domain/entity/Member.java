@@ -23,7 +23,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "member")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "inheritance_type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "member_type", discriminatorType = DiscriminatorType.STRING)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -59,5 +59,8 @@ public abstract class Member extends BaseEntity {
 	private MemberRole role;
 
 	@Column(length = 255)
-	private String storeImage;
+	private String image;
+
+	@Column(name = "kakao_id", nullable = false)
+	private Long kakaoId;
 }
