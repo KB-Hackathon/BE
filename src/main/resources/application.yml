@@ -33,4 +33,9 @@ spring:
     base_url: ${APICK_BASE_URL}
     auth_key: ${APICK_AUTH_KEY}
 
+  openai:
+    api:
+      key: ${OPENAI_API_KEY}
+      url: ${OPENAI_API_URL}
+      model: ${OPENAI_API_MODEL}
 
