@@ -28,3 +28,9 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false  # 수신 측 타입 헤더 미포함(호환성)
+
+  apick:
+    base_url: ${APICK_BASE_URL}
+    auth_key: ${APICK_AUTH_KEY}
+
+
