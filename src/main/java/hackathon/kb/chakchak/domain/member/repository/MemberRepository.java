@@ -27,7 +27,8 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
                company_phone_number         = :companyPhoneNumber,
                zip_code                     = :zipCode,
                road_name_address            = :roadNameAddress,
-               company_classification_code  = :companyClassificationCode
+               company_classification_code  = :companyClassificationCode,
+                adm_cd                      = :admCd
          WHERE member_id = :memberId
         """, nativeQuery = true)
     int promoteBuyerToSeller(
@@ -40,10 +41,11 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
             @Param("companyPhoneNumber") String companyPhoneNumber,
             @Param("zipCode") String zipCode,
             @Param("roadNameAddress") String roadNameAddress,
-            @Param("companyClassificationCode") String companyClassificationCode
+            @Param("companyClassificationCode") String companyClassificationCode,
+            @Param("admCd") String admCd
     );
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Seller s SET s.admCd = :admCd WHERE s.id = :sellerId")
-    int updateSellerAdmCd(@Param("sellerId") Long sellerId, @Param("admCd") String admcd);
+    // @Modifying(clearAutomatically = true)
+    // @Query("UPDATE Seller s SET s.admCd = :admCd WHERE s.id = :sellerId")
+    // int updateSellerAdmCd(@Param("sellerId") Long sellerId, @Param("admCd") String admcd);
 }

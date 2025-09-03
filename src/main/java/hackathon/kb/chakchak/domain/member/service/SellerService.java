@@ -11,6 +11,7 @@ import hackathon.kb.chakchak.global.util.ApiConnectionUtil;
 import hackathon.kb.chakchak.global.utils.api.juso.JusoApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,22 +45,42 @@ public class SellerService {
         if (member instanceof Seller seller) return seller;
 
         // 1. Apick API -> 사업자 정보
-        ApickBizDetailResponse.Data d = callApick(bizNo);
-
-        // 2. promoition
-        Seller newSeller = promotionService.promoteBuyerToSeller(member.getId(), d);
-
-        // 3. get admCd
-        String admCd = jusoApiClient.requestAdmCd(newSeller.getRoadNameAddress());
-
-        // 4. DB 반영
-        if (admCd != null) {
-            memberRepository.updateSellerAdmCd(newSeller.getId(), admCd);
+        ApickBizDetailResponse.Data d;
+        try {
+            d = callApick(bizNo);
+        } catch (Exception e) {
+            log.error("Apick API 호출 실패: bizNo={}, memberId={}", bizNo, memberId, e);
+            throw new BusinessException(ResponseCode.INTERNAL_SERVER_ERROR);
         }
 
-        return newSeller;
-    }
+        // 2. admCd
+        String roadNameAddress = d.getRoadNameAddress();
+        if (roadNameAddress == null || roadNameAddress.isBlank()) {
+            log.warn("도로명 주소 없음 bizNo={}, memberId={}", bizNo, memberId);
+            throw new BusinessException(ResponseCode.BAD_REQUEST);
+        }
 
+        String admCd;
+        try {
+            admCd = jusoApiClient.requestAdmCd(roadNameAddress);
+        } catch (Exception e) {
+            log.error("Juso 호출 실패 memberId={}, road={}", memberId, roadNameAddress, e);
+            throw new BusinessException(ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
+        if (admCd == null || admCd.isBlank()) {
+            log.warn("Juso 응답에 admCd 없음 memberId={}, road={}", memberId, roadNameAddress);
+            throw new BusinessException(ResponseCode.BAD_REQUEST);
+        }
+
+        // 3. promoition
+        try {
+            return promotionService.promoteBuyerToSeller(member.getId(), d, admCd);
+        } catch (Exception e) {
+            log.error("승급 실패 memberId={}", memberId, e);
+            throw new BusinessException(ResponseCode.CONFLICT);
+        }
+    }
 
     private ApickBizDetailResponse.Data callApick(String bizNo) {
         HttpHeaders headers = new HttpHeaders();
