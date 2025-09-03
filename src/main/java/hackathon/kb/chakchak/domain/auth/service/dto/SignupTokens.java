@@ -1,4 +1,4 @@
-package hackathon.kb.chakchak.domain.oauth.service.dto;
+package hackathon.kb.chakchak.domain.auth.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

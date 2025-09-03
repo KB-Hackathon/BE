@@ -1,9 +1,9 @@
-package hackathon.kb.chakchak.domain.oauth.api.controller;
+package hackathon.kb.chakchak.domain.auth.api.controller;
 
 import hackathon.kb.chakchak.domain.jwt.util.CookieIssuer;
 import hackathon.kb.chakchak.domain.member.api.dto.req.AdditionalInfoRequest;
-import hackathon.kb.chakchak.domain.oauth.service.OauthService;
-import hackathon.kb.chakchak.domain.oauth.service.dto.SignupTokens;
+import hackathon.kb.chakchak.domain.auth.service.AuthService;
+import hackathon.kb.chakchak.domain.auth.service.dto.SignupTokens;
 import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OauthController {
 
     private final CookieIssuer refreshCookieSupport;
-    private final OauthService oauthService;
+    private final AuthService oauthService;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -31,10 +31,10 @@ public class OauthController {
     @Value("${jwt.refresh-token-validity-seconds}")
     private long refreshTtl;
 
-    @Value("${auth.cookie.domain:}")
+    @Value("${auth.cookie.domain}")
     private String cookieDomain;
 
-    @Value("${auth.cookie.secure:true}")
+    @Value("${auth.cookie.secure}")
     private boolean cookieSecure;
 
     @PostMapping("/signup/additional")

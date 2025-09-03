@@ -34,11 +34,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
+        log.info("카카오 로그인에 성공했습니다.");
+
         CustomKakaoOAuth2User principal = (CustomKakaoOAuth2User) authentication.getPrincipal();
-
-        log.info("카카오 로그인에 성공했습니다. 해당 사용자의 정보입니다");
         Long kakaoId = principal.getKakaoId();
-
         log.info("[OAUTH2] success. kakaoId={}", kakaoId);
 
         invalidateSession(request, response); // 세션 정리

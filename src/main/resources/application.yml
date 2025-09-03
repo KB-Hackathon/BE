@@ -42,12 +42,8 @@ spring:
             client-secret: ${CLIENT_SECRET}
             client-authentication-method: client_secret_post # POST
             client-name: kakao
-#            http://localhost:8080/oauth2/authorization/kakao # 프론트에서 요청 보내는 주소
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            redirect-uri: ${REDIRECT_URL}
             authorization-grant-type: authorization_code
-#            scope:
-#              - profile_nickname # 필수 동의(임시)
-#              - profile_image # 선택 동의(임시)
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -60,12 +56,13 @@ spring:
       key: ${OPENAI_API_KEY}
       url: ${OPENAI_API_URL}
       model: ${OPENAI_API_MODEL}
+
 jwt:
-  secret: "djfldksjfkldsfhjdskfahsdkljfhjdsfhj" # ${JWT_SECRET}
-  access-token-validity-seconds: 60 # 600초 = 10분
-  refresh-token-validity-seconds: 300 # 1209600초 = 14일
+  secret: ${JWT_SECRET}
+  access-token-validity-seconds: 1800 # 1800초 = 30분
+  refresh-token-validity-seconds: 259200 # 259200초 = 3일
 
 auth:
   cookie:
-    domain: "" # ${AUTH_COOKIE_DOMAIN:}  # 개발 로컬이면 빈값
-    secure: false # 배포 환경 true, 로컬 false ${AUTH_COOKIE_SECURE:true}
+    domain: ${AUTH_COOKIE_DOMAIN}
+    secure: ${AUTH_COOKIE_SECURE}

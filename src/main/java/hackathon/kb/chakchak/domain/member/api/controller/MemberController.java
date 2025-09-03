@@ -1,6 +1,6 @@
 package hackathon.kb.chakchak.domain.member.api.controller;
 
-import hackathon.kb.chakchak.domain.jwt.filter.MemberPrincipal;
+import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.member.api.dto.res.MemberProfileResponse;
 import hackathon.kb.chakchak.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,4 @@ public class MemberController {
         Long memberId = principal.getId();
         return ResponseEntity.ok(memberService.getMyProfile(memberId));
     }
-
-
-    // TODO: 권한으로 403 반환
-    // @PreAuthorize("hasAnyRole('SELLER')")
 }

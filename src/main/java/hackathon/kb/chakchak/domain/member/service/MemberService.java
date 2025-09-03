@@ -7,13 +7,14 @@ import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import hackathon.kb.chakchak.global.response.ResponseCode;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-//@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
 
+    @Transactional(readOnly = true)
     public MemberProfileResponse getMyProfile(Long memberId) {
         Member m = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));

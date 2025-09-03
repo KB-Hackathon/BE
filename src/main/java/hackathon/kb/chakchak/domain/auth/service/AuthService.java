@@ -1,4 +1,4 @@
-package hackathon.kb.chakchak.domain.oauth.service;
+package hackathon.kb.chakchak.domain.auth.service;
 
 import hackathon.kb.chakchak.domain.jwt.util.JwtIssuer;
 import hackathon.kb.chakchak.domain.member.api.dto.req.AdditionalInfoRequest;
@@ -7,7 +7,7 @@ import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.member.domain.enums.MemberRole;
 import hackathon.kb.chakchak.domain.member.domain.enums.SocialType;
 import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
-import hackathon.kb.chakchak.domain.oauth.service.dto.SignupTokens;
+import hackathon.kb.chakchak.domain.auth.service.dto.SignupTokens;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import io.jsonwebtoken.Claims;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OauthService {
+public class AuthService {
     private final MemberRepository memberRepository;
     private final JwtIssuer jwtIssuer;
 

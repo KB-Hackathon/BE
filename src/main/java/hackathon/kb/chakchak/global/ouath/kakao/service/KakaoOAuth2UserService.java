@@ -13,12 +13,10 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-//@Transactional
 public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
@@ -35,10 +33,6 @@ public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
 
         Collection<GrantedAuthority> authorities = AuthorityUtils.NO_AUTHORITIES;
         return new CustomKakaoOAuth2User(authorities, mapped, "kakaoId");
-    }
-
-    private String asString(Object v) {
-        return v == null ? null : String.valueOf(v);
     }
 }
 

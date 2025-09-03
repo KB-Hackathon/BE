@@ -1,4 +1,4 @@
-package hackathon.kb.chakchak.domain.jwt.filter;
+package hackathon.kb.chakchak.domain.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

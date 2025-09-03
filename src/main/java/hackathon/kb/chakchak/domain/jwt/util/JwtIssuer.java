@@ -27,7 +27,7 @@ public class JwtIssuer {
     /** access 토큰 발급 */
     public String createAccessToken(Long memberId, String role) {
         Instant now = Instant.now();
-        Date exp = Date.from(now.plus(accessTtl, ChronoUnit.SECONDS)); // 10분
+        Date exp = Date.from(now.plus(accessTtl, ChronoUnit.SECONDS));
 
         return Jwts.builder()
                 .claim("typ", "access")
@@ -42,7 +42,7 @@ public class JwtIssuer {
     /** refresh 토큰 발급 */
     public String createRefreshToken(Long memberId) {
         Instant now = Instant.now();
-        Date exp = Date.from(now.plus(refreshTtl, ChronoUnit.SECONDS)); // 14일
+        Date exp = Date.from(now.plus(refreshTtl, ChronoUnit.SECONDS));
 
         return Jwts.builder()
                 .claim("typ", "refresh")

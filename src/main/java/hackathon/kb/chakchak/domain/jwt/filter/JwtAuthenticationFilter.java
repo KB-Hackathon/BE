@@ -1,5 +1,6 @@
 package hackathon.kb.chakchak.domain.jwt.filter;
 
+import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.jwt.util.JwtIssuer;
 import hackathon.kb.chakchak.domain.jwt.util.CookieIssuer;
 import io.jsonwebtoken.Claims;
@@ -18,9 +19,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;

@@ -14,10 +14,10 @@ public class CookieIssuer {
     @Value("${jwt.refresh-token-validity-seconds}")
     private long refreshTtl;
 
-    @Value("${auth.cookie.domain:}")
+    @Value("${auth.cookie.domain}")
     private String cookieDomain;
 
-    @Value("${auth.cookie.secure:true}")
+    @Value("${auth.cookie.secure}")
     private boolean cookieSecure;
 
     public ResponseCookie build(String token) {

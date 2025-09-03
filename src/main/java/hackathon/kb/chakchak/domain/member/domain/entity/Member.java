@@ -23,7 +23,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "member")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "member_type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "inheritance_type", discriminatorType = DiscriminatorType.STRING)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
