@@ -43,6 +43,11 @@ public class SecurityConfig {
                         // "/oauth2/authorization/kakao/**" -> 이 부분은 일부러 명시
                         .requestMatchers("/api/oauth/**", "/api/auth/**", "/login/**", "/oauth2/**", "/oauth2/authorization/kakao/**").permitAll() // TODO: 정리 필요
                         .requestMatchers("/health/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/api-docs/**",
+                                "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/oauth/signup/complete").permitAll()
                         .anyRequest().authenticated()
                 )
