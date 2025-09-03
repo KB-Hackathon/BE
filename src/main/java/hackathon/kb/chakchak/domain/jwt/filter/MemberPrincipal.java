@@ -13,4 +13,3 @@ public class MemberPrincipal {
     Long id;
     String role;
 }
-

@@ -39,7 +39,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         log.info("카카오 로그인에 성공했습니다. 해당 사용자의 정보입니다");
         Long kakaoId = principal.getKakaoId();
 
-        log.info("[OAUTH2] success. kakaoId={}, nickname={}, profileImg?={}",
+        log.info("[OAUTH2] success. kakaoId={}, nickname={}, profileImg={}",
                 kakaoId, principal.getNickname(), principal.getProfileImageUrl());
 
         invalidateSession(request); // 세션 정리

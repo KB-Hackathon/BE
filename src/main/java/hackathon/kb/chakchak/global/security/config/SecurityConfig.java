@@ -2,6 +2,8 @@ package hackathon.kb.chakchak.global.security.config;
 
 import hackathon.kb.chakchak.domain.jwt.filter.JwtAuthenticationFilter;
 import hackathon.kb.chakchak.global.ouath.kakao.service.KakaoOAuth2UserService;
+import hackathon.kb.chakchak.global.security.handler.JsonAccessDeniedHandler;
+import hackathon.kb.chakchak.global.security.handler.JsonAuthenticationEntryPoint;
 import hackathon.kb.chakchak.global.security.handler.OAuth2FailureHandler;
 import hackathon.kb.chakchak.global.security.handler.OAuth2SuccessHandler;
 import java.util.List;
@@ -24,6 +26,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint;
+    private final JsonAccessDeniedHandler jsonAccessDeniedHandler;
     private final KakaoOAuth2UserService kakaoOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
@@ -42,11 +46,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/oauth/signup/complete").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jsonAuthenticationEntryPoint) // 401
+                        .accessDeniedHandler(jsonAccessDeniedHandler)           // 403
+                )
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(ui -> ui.userService(kakaoOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler)
                 )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
