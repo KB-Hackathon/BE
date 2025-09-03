@@ -38,11 +38,11 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                // IF_REQUIRED: OAuth2 인증 처리에는 세션이 잠시 필요할 수 있음, 추후 처리
-                .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // "/oauth2/authorization/kakao/**" -> 이 부분은 일부러 명시
-                        .requestMatchers("/auth/**", "/login/**", "/oauth2/**", "/oauth2/authorization/kakao/**").permitAll() // TODO: 정리 필요
+                        .requestMatchers("/api/oauth/**", "/api/auth/**", "/login/**", "/oauth2/**", "/oauth2/authorization/kakao/**").permitAll() // TODO: 정리 필요
+                        .requestMatchers("/health/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/oauth/signup/complete").permitAll()
                         .anyRequest().authenticated()
                 )

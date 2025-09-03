@@ -35,12 +35,4 @@ public class CustomKakaoOAuth2User implements OAuth2User {
         Object v = attributes.get("kakaoId");
         return (v instanceof Number) ? ((Number) v).longValue() : Long.valueOf(String.valueOf(v));
     }
-
-    public String getNickname() {
-        return (String) attributes.get("nickname");
-    }
-
-    public String getProfileImageUrl() {
-        return (String) attributes.get("profileImageUrl");
-    }
 }

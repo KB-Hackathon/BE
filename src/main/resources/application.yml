@@ -45,9 +45,9 @@ spring:
 #            http://localhost:8080/oauth2/authorization/kakao # 프론트에서 요청 보내는 주소
             redirect-uri: http://localhost:8080/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
-            scope:
-              - profile_nickname # 필수 동의(임시)
-              - profile_image # 선택 동의(임시)
+#            scope:
+#              - profile_nickname # 필수 동의(임시)
+#              - profile_image # 선택 동의(임시)
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -64,3 +64,4 @@ auth:
   cookie:
     domain: "" # ${AUTH_COOKIE_DOMAIN:}  # 개발 로컬이면 빈값
     secure: false # 배포 환경 true, 로컬 false ${AUTH_COOKIE_SECURE:true}
+

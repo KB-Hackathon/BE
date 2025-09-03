@@ -26,29 +26,12 @@ public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest); // 카카오에서 사용자 정보 가져옴
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        log.debug(attributes.toString());
+        log.info("kakao에서 로그인하고 받아온 정보입니다. {}", attributes.toString());
 
         Long kakaoId = ((Number) attributes.get("id")).longValue();
 
-        String nickname = null; // 필수
-        String profileImageUrl = null; // 선택
-
-        // TODO: 다듬자
-        Object kakaoAccountObj = attributes.get("kakao_account");
-        if (kakaoAccountObj instanceof Map<?, ?> kakaoAccount) {
-            Object profileObj = kakaoAccount.get("profile");
-            if (profileObj instanceof Map<?, ?> profile) {
-                nickname = asString(profile.get("nickname")); // 필수 동의
-                profileImageUrl = asString(profile.get("profile_image_url")); // 선택 동의
-            }
-        }
-
-        log.info("[KAKAO] user loaded. id={}, nickname={}, profileImage={}", kakaoId, nickname, profileImageUrl);
-
         Map<String, Object> mapped = new HashMap<>();
         mapped.put("kakaoId", kakaoId);
-        if (nickname != null) mapped.put("nickname", nickname);
-        if (profileImageUrl != null) mapped.put("profileImageUrl", profileImageUrl);
 
         Collection<GrantedAuthority> authorities = AuthorityUtils.NO_AUTHORITIES;
         return new CustomKakaoOAuth2User(authorities, mapped, "kakaoId");

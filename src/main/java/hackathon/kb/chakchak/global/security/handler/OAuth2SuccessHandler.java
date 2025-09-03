@@ -39,10 +39,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         log.info("카카오 로그인에 성공했습니다. 해당 사용자의 정보입니다");
         Long kakaoId = principal.getKakaoId();
 
-        log.info("[OAUTH2] success. kakaoId={}, nickname={}, profileImg={}",
-                kakaoId, principal.getNickname(), principal.getProfileImageUrl());
+        log.info("[OAUTH2] success. kakaoId={}", kakaoId);
 
-        invalidateSession(request); // 세션 정리
+        invalidateSession(request, response); // 세션 정리
 
         Optional<Member> member = memberRepository.findByKakaoId(kakaoId);
         log.info("우리의 DB에서 해당 사용자가 존재하는지 확인힙니다.: {}", member);
@@ -64,19 +63,19 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         // 신규 회원 — 추가 필수 항목을 우리 폼에서 받아야 함
         String signupToken = jwtIssuer.createSignupToken(kakaoId);
-        log.info("[SIGNUP] need more info(age, address). kakaoId={}", kakaoId);
+        log.info("[SIGNUP] need more info(name, age, address). kakaoId={}", kakaoId);
 
         objectMapper.writeValue(response.getWriter(), Map.of(
                 "registered", false,
-                "signupToken", signupToken,
-                "nickname", principal.getNickname(),
-                "profileImageUrl", Optional.ofNullable(principal.getProfileImageUrl()).orElse("")
+                "signupToken", signupToken
         ));
     }
 
-    private void invalidateSession(HttpServletRequest request) {
+    private void invalidateSession(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(false);
         if (session != null) session.invalidate();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, "JSESSIONID=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax");
     }
 
 }
