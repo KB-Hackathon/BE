@@ -8,6 +8,7 @@ import hackathon.kb.chakchak.domain.member.service.dto.ApickBizDetailResponse;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import hackathon.kb.chakchak.global.util.ApiConnectionUtil;
+import hackathon.kb.chakchak.global.utils.api.juso.JusoApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ public class SellerService {
     private final MemberRepository memberRepository;
     private final MemberRolePromotionService promotionService;
     private final RestTemplate restTemplate;
+    private final JusoApiClient jusoApiClient;
 
     @Value("${apick.base-url}")
     private String baseUrl;
@@ -41,8 +43,21 @@ public class SellerService {
                 .orElseThrow(() -> new BusinessException(ResponseCode.UNAUTHORIZED));
         if (member instanceof Seller seller) return seller;
 
+        // 1. Apick API -> 사업자 정보
         ApickBizDetailResponse.Data d = callApick(bizNo);
-        return promotionService.promoteBuyerToSeller(member.getId(), d);
+
+        // 2. promoition
+        Seller newSeller = promotionService.promoteBuyerToSeller(member.getId(), d);
+
+        // 3. get admCd
+        String admCd = jusoApiClient.requestAdmCd(newSeller.getRoadNameAddress());
+
+        // 4. DB 반영
+        if (admCd != null) {
+            memberRepository.updateSellerAdmCd(newSeller.getId(), admCd);
+        }
+
+        return newSeller;
     }
 
 
