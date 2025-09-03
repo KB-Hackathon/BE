@@ -3,6 +3,8 @@ package hackathon.kb.chakchak.domain.member.repository;
 import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
 import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -40,4 +42,8 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
             @Param("roadNameAddress") String roadNameAddress,
             @Param("companyClassificationCode") String companyClassificationCode
     );
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Seller s SET s.admCd = :admCd WHERE s.id = :sellerId")
+    int updateSellerAdmCd(@Param("sellerId") Long sellerId, @Param("admCd") String admcd);
 }
