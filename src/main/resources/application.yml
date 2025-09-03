@@ -55,6 +55,11 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+  openai:
+    api:
+      key: ${OPENAI_API_KEY}
+      url: ${OPENAI_API_URL}
+      model: ${OPENAI_API_MODEL}
 jwt:
   secret: "djfldksjfkldsfhjdskfahsdkljfhjdsfhj" # ${JWT_SECRET}
   access-token-validity-seconds: 60 # 600초 = 10분
@@ -64,4 +69,3 @@ auth:
   cookie:
     domain: "" # ${AUTH_COOKIE_DOMAIN:}  # 개발 로컬이면 빈값
     secure: false # 배포 환경 true, 로컬 false ${AUTH_COOKIE_SECURE:true}
-
