@@ -59,5 +59,8 @@ public abstract class Member extends BaseEntity {
 	private MemberRole role;
 
 	@Column(length = 255)
-	private String storeImage;
+	private String image;
+
+	@Column(name = "kakao_id", nullable = false)
+	private Long kakaoId;
 }

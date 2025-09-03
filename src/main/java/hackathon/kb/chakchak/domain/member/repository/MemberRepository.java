@@ -1,18 +1,19 @@
 package hackathon.kb.chakchak.domain.member.repository;
 
-import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
 import hackathon.kb.chakchak.domain.member.domain.entity.Member;
-import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
-
 public interface MemberRepository extends JpaRepository<Member,Long> {
+
+    Optional<Member> findByKakaoId(Long kakaoId);
+
+    boolean existsByKakaoId(Long kakaoId);
+
+    Optional<Member> findById(Long Id);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
@@ -31,6 +32,7 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
                 adm_cd                      = :admCd
          WHERE member_id = :memberId
         """, nativeQuery = true)
+
     int promoteBuyerToSeller(
             @Param("memberId") Long memberId,
             @Param("bizNo") String bizNo,
