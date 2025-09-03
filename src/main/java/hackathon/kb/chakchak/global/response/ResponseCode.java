@@ -16,10 +16,13 @@ public enum ResponseCode {
 	NOT_FOUND("GEN-003", HttpStatus.NOT_FOUND, "Not Found"),
 	CONFLICT("GEN-004", HttpStatus.CONFLICT, "Conflict"),
 	INTERNAL_SERVER_ERROR("GEN-005", HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
-
+	S3_UPLOAD_FAIL("GEN-006", HttpStatus.INTERNAL_SERVER_ERROR, "S3 이미지 업로드 실패"),
+	S3_NOT_FOUND("GEN-007", HttpStatus.INTERNAL_SERVER_ERROR, "이름 기반 S3 이미지 조회 실패"),
 	SIGNUP_TOKEN_INVALID("OAUTH-001", HttpStatus.BAD_REQUEST, "Invalid signup token"),
 	SIGNUP_TOKEN_EXPIRED("OAUTH-002", HttpStatus.UNAUTHORIZED, "Signup token expired"),
-	SIGNUP_NOT_REQUIRED("OAUTH-003", HttpStatus.CONFLICT, "Signup not required");
+	SIGNUP_NOT_REQUIRED("OAUTH-003", HttpStatus.CONFLICT, "Signup not required"),
+  
+  ;
 
 	private final String code;
 	private final HttpStatus status;
