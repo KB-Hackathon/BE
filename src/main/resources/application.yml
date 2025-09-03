@@ -3,9 +3,9 @@ spring:
     name: chakchak
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/chakchak?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -29,16 +29,19 @@ spring:
       properties:
         spring.json.add.type.headers: false  # 수신 측 타입 헤더 미포함(호환성)
 
-  apick:
-    base_url: ${APICK_BASE_URL}
-    auth_key: ${APICK_AUTH_KEY}
+apick:
+  base-url: ${APICK_BASE_URL}
+  auth-key: ${APICK_AUTH_KEY}
 
-  openai:
-    api:
-      key: ${OPENAI_API_KEY}
-      url: ${OPENAI_API_URL}
-      model: ${OPENAI_API_MODEL}
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: ${OPENAI_API_URL}
+    model: ${OPENAI_API_MODEL}
 
+juso:
+  base-url: ${JUSO_ADMCD_BASE_URL}
+  api-key: ${JUSO_ADMCD_API_KEY}
 
 springdoc:
   api-docs:
