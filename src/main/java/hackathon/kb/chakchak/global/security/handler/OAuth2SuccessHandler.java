@@ -5,6 +5,7 @@ import hackathon.kb.chakchak.domain.jwt.util.JwtIssuer;
 import hackathon.kb.chakchak.domain.jwt.util.CookieIssuer;
 import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
+import hackathon.kb.chakchak.global.redis.util.RedisUtil;
 import hackathon.kb.chakchak.global.security.CustomKakaoOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +28,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final MemberRepository memberRepository;
     private final JwtIssuer jwtIssuer;
     private final CookieIssuer refreshCookieSupport;
+    private final RedisUtil redisUtil;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -50,6 +53,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
             String access = jwtIssuer.createAccessToken(m.getId(), m.getRole().name());
             String refresh = jwtIssuer.createRefreshToken(m.getId());
+
+            // refresh 토큰 redis에 저장
+            redisUtil.set("refresh:" + m.getId(), refresh);
 
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookieSupport.build(refresh).toString());
 

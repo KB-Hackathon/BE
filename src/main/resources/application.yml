@@ -85,3 +85,6 @@ cloud:
       bucket: ${BUCKET_NAME}
     region:
       static: ${REGION}
+
+kakao:
+  admin-key: ${ADMIN}
