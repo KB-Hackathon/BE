@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class NarrativeResult {
+    private final Long productId;
     private final String caption;
     private final List<String> hashtags;
 }

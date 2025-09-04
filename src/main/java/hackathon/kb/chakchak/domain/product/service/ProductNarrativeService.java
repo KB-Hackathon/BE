@@ -1,9 +1,15 @@
 package hackathon.kb.chakchak.domain.product.service;
 
+import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.member.repository.SellerRepository;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductMetaRequest;
+import hackathon.kb.chakchak.domain.product.domain.entity.Image;
 import hackathon.kb.chakchak.domain.product.domain.entity.InstaPrompt;
+import hackathon.kb.chakchak.domain.product.domain.entity.Product;
+import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
+import hackathon.kb.chakchak.domain.product.repository.ImageRepository;
 import hackathon.kb.chakchak.domain.product.repository.InstaPromptRepository;
+import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
 import hackathon.kb.chakchak.domain.product.service.dto.NarrativeResult;
 import hackathon.kb.chakchak.global.s3.service.S3StorageService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,27 +28,57 @@ import java.util.List;
 public class ProductNarrativeService {
     private final SellerRepository sellerRepository;
     private final InstaPromptRepository instaPromptRepository;
+    private final ProductRepository productRepository;
+    private final ImageRepository imageRepository;
+
     private final OpenAIMultimodalNarrativeService openAIMultimodalNarrativeService;
     private final S3StorageService s3StorageService;
 
     @Transactional(readOnly = false)
     public NarrativeResult createNarrative(Long memberId, ProductMetaRequest meta, List<MultipartFile> images) {
-        // 1) 이미지 S3 업로드
+        // 0) seller
+        Seller seller = sellerRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalStateException("Seller 정보가 없습니다."));
+
+        // 1) Product 즉시 저장 (nullable=false 필드에 기본값 채우기)
+        LocalDateTime now = LocalDateTime.now();
+        Product product = Product.builder()
+                .seller(seller)
+                .endCaptureId(0L) // 기본값(업데이트 예정)
+                .title(meta.getTitle())
+                .category(meta.getCategory())
+                .price(0L) // 기본값(업데이트 예정)
+                .description(meta.getDescription())
+                .status(ProductStatus.DRAFT) // 임시 상태
+                .targetAmount(null) // 기본값(업데이트 예정)
+                .recruitmentStartPeriod(now) // 기본값(업데이트 예정)
+                .recruitmentEndPeriod(now.plusDays(30)) // 기본값(업데이트 예정)
+                .refreshCnt((short) 0) // 기본값(업데이트 예정)
+                .refreshedAt(now) // 기본값(업데이트 예정)
+                .build();
+
+        product = productRepository.save(product);
+
+        // 2) 이미지 URL들 ProductImage로 저장
         List<String> imageUrls = s3StorageService
                 .uploadImages(images, "products")
                 .stream()
                 .map(URL::toString)
                 .toList();
 
-        // 2) 카테고리 프롬프트 조회
+        List<Image> imgs = new ArrayList<>();
+        for (int i = 0; i < imageUrls.size(); i++) {
+            imgs.add(Image.builder()
+                    .product(product)
+                    .url(imageUrls.get(i))
+                    .build());
+        }
+        imageRepository.saveAll(imgs);
+
+        // 3) 카테고리 프롬프트 조회
         InstaPrompt prompt = instaPromptRepository
                 .findTopByCategory(meta.getCategory())
                 .orElseThrow(() -> new IllegalStateException("해당 카테고리 프롬프트가 없습니다."));
-
-        // 3) 가게명 조회
-//        String companyName = sellerRepository.findById(memberId)
-//                .map(Seller::getCompanyName)
-//                .orElseThrow(() -> new IllegalStateException("Seller 정보가 없습니다."));
 
         // 4) 피처 기반 가이드 구성
         String featureGuide = """
@@ -88,7 +126,7 @@ public class ProductNarrativeService {
                     - 카테고리: %s
                     - 설명: %s
                 """.formatted(
-                "스타벅스 합정점", //companyName
+                "스타벅스 합정점", // seller.getCompanyName()
                 meta.getTitle(),
                 meta.getCategory(),
                 meta.getDescription()
@@ -96,7 +134,7 @@ public class ProductNarrativeService {
 
         // 6) GPT 호출
         return openAIMultimodalNarrativeService.generateNarrativeWithImageUrls(
-                systemInstruction, userText, imageUrls
+                product.getId(), systemInstruction, userText, imageUrls
         );
     }
 }

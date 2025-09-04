@@ -29,6 +29,7 @@ public class OpenAIMultimodalNarrativeService {
     private String model;
 
     public NarrativeResult generateNarrativeWithImageUrls(
+            Long productId,
             String systemInstruction,
             String userText,
             List<String> imageUrls
@@ -53,7 +54,7 @@ public class OpenAIMultimodalNarrativeService {
         }
 
         String raw = callOnce(systemInstruction, userParts);
-        return tryParseJsonResult(raw);
+        return tryParseJsonResult(productId, raw);
     }
 
     /**
@@ -153,7 +154,7 @@ public class OpenAIMultimodalNarrativeService {
     }
 
     // JSON 파서
-    private NarrativeResult tryParseJsonResult(String respText) {
+    private NarrativeResult tryParseJsonResult(Long productId, String respText) {
         String text = tryParseResponsesApi(respText);
         if (text == null || text.isBlank()) {
             text = respText; // 모델이 곧장 JSON만 준 경우 대비
@@ -165,10 +166,10 @@ public class OpenAIMultimodalNarrativeService {
             String hashtagsRaw = root.path("hashtags").asText(null);
             List<String> hashtags = parseHashtags(hashtagsRaw);
 
-            return new NarrativeResult(caption, hashtags);
+            return new NarrativeResult(productId, caption, hashtags);
         } catch (Exception e) {
             log.warn("JSON 파싱 실패, 원문 반환 시도: {}", e.toString());
-            return new NarrativeResult(text == null ? "" : text.trim(), Collections.emptyList());
+            return new NarrativeResult(0L, text == null ? "" : text.trim(), Collections.emptyList());
         }
     }
 
