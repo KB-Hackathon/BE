@@ -57,6 +57,13 @@ spring:
       url: ${OPENAI_API_URL}
       model: ${OPENAI_API_MODEL}
 
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}
+    ssl:
+      enabled: ${SSL_ENABLED}
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity-seconds: 1800 # 1800초 = 30분
