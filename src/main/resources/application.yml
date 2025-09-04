@@ -39,10 +39,6 @@ spring:
       url: ${OPENAI_API_URL}
       model: ${OPENAI_API_MODEL}
 
-  juso:
-    base-url: ${JUSO_ADMCD_BASE_URL}
-    api-key: ${JUSO_ADMCD_API_KEY}
-
   security:
     oauth2:
       client:
@@ -98,3 +94,7 @@ cloud:
 
 kakao:
   admin-key: ${ADMIN}
+
+juso:
+  base-url: ${JUSO_ADMCD_BASE_URL}
+  api-key: ${JUSO_ADMCD_API_KEY}
