@@ -3,9 +3,9 @@ spring:
     name: chakchak
 
   datasource:
-    url: jdbc:mysql://localhost:3306/chakchak?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: root1234
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -30,8 +30,8 @@ spring:
         spring.json.add.type.headers: false  # 수신 측 타입 헤더 미포함(호환성)
 
   apick:
-    base-url: ${APICK_BASE_URL}
-    auth-key: ${APICK_AUTH_KEY}
+    base_url: ${APICK_BASE_URL}
+    auth_key: ${APICK_AUTH_KEY}
 
   openai:
     api:
