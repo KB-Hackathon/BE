@@ -1,15 +1,16 @@
 package hackathon.kb.chakchak.domain.product.api.controller;
 
+import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductMetaRequest;
+import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveRequest;
+import hackathon.kb.chakchak.domain.product.service.ProductCommandService;
 import hackathon.kb.chakchak.domain.product.service.ProductNarrativeService;
 import hackathon.kb.chakchak.domain.product.service.dto.NarrativeResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,15 +20,21 @@ import java.util.List;
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductNarrativeService productNarrativeService;
+    private final ProductCommandService productCommandService;
 
     @PostMapping(value = "/narrative", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<NarrativeResult> makeNarrative(
             @RequestPart("meta") ProductMetaRequest meta,
-            @RequestPart("images") List<MultipartFile> images
-            // todo @AuthenticationPrincipal CustomUser customUser 추가
+            @RequestPart("images") List<MultipartFile> images,
+            @AuthenticationPrincipal MemberPrincipal principal
     ) {
         return ResponseEntity.ok(
-                productNarrativeService.createNarrative(1L, meta, images)); // todo customUser 정보 받아오도록 수정
+                productNarrativeService.createNarrative(principal.getId(), meta, images));
     }
 
+    @PostMapping("/save")
+    public ResponseEntity<Void> saveProduct(@RequestBody ProductSaveRequest req) {
+        Long productId = productCommandService.saveProduct(req);
+        return ResponseEntity.ok().build();
+    }
 }

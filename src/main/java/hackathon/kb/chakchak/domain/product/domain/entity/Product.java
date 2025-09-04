@@ -49,6 +49,8 @@ public class Product extends BaseEntity {
 	@Column(nullable = false)
 	private Long price;
 
+	private boolean isCoupon;
+
 	@Lob
 	@Column(nullable = false)
 	private String description;
@@ -67,4 +69,41 @@ public class Product extends BaseEntity {
 	private Short refreshCnt;
 
 	private LocalDateTime refreshedAt;
+
+
+	// ====== 변경 메서드 (업데이트 전용) ======
+
+	public void changeEndCaptureId(Long id) {
+		this.endCaptureId = id;
+	}
+
+	public void changeDescription(String description) {
+		if (description != null) this.description = description;
+	}
+
+	public void changePrice(Long price) {
+		if (price != null) this.price = price;
+	}
+
+	// boolean 필드는 null-safe 입력 메서드로
+	public void changeCoupon(Boolean isCoupon) {
+		if (isCoupon != null) this.isCoupon = isCoupon;
+	}
+
+	public void changeTargetAmount(Short targetAmount) {
+		if (targetAmount != null) this.targetAmount = targetAmount;
+	}
+
+	public void changeRecruitmentPeriods(LocalDateTime start, LocalDateTime end) {
+		if (start != null) this.recruitmentStartPeriod = start;
+		if (end != null) this.recruitmentEndPeriod = end;
+	}
+
+	public void markPending() {
+		this.status = ProductStatus.PENDING;
+	}
+
+	public void touchRefreshedAt(LocalDateTime now) {
+		this.refreshedAt = now;
+	}
 }
