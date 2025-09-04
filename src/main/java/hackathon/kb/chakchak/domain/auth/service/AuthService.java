@@ -46,6 +46,7 @@ public class AuthService {
                 Buyer.builder()
                         .name(req.getName())
                         .age(req.getAge())
+                        .gender(req.getGender())
                         .address(req.getAddress())
                         .phoneNumber(req.getPhoneNumber())
                         .social(SocialType.KAKAO)
