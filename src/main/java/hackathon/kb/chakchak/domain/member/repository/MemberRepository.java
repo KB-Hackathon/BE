@@ -13,8 +13,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
     boolean existsByKakaoId(Long kakaoId);
 
-    Optional<Member> findById(Long Id);
-
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
         UPDATE member
