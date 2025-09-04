@@ -24,9 +24,6 @@ public class RedisConfig {
     @Value("${spring.redis.port}")
     private int redisPort;
 
-    @Value("${spring.redis.password}")
-    private String redisPassword;
-
     @Value("${spring.redis.ssl.enabled}")
     private Boolean sslEnabled;
 
