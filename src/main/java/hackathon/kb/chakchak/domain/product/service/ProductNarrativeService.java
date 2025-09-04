@@ -42,7 +42,23 @@ public class ProductNarrativeService {
 //                .map(Seller::getCompanyName)
 //                .orElseThrow(() -> new IllegalStateException("Seller 정보가 없습니다."));
 
-        // 4) 프롬프트 구성
+        // 4) 피처 기반 가이드 구성
+        String featureGuide = """
+                [스타일 피처 요약]
+                - 키워드 Top-N: %s
+                - 이모지 비율: %.2f
+                - 해시태그 수: %d
+                - 문장 길이 분포: %s
+                - CTA 유형: %s
+                """.formatted(
+                prompt.getTopKeywords(),
+                prompt.getEmojiRatio(),
+                prompt.getHashtagCount(),
+                prompt.getSentenceLenHistJson(),
+                prompt.getCtaTypesJson()
+        );
+
+        // 5) 프롬프트 구성
         String systemInstruction = """
                 당신은 감성적인 인스타그램 카피라이터야.
                 아래 '카테고리 전용 가이드'와 '상품 정보'를 반영해,
@@ -63,7 +79,7 @@ public class ProductNarrativeService {
                 
                 [카테고리 전용 가이드]
                 %s
-                """.formatted(prompt.getContent());
+                """.formatted(featureGuide);
 
         String userText = """
                     [상품 정보]
@@ -78,7 +94,7 @@ public class ProductNarrativeService {
                 meta.getDescription()
         );
 
-        // 5) GPT 호출
+        // 6) GPT 호출
         return openAIMultimodalNarrativeService.generateNarrativeWithImageUrls(
                 systemInstruction, userText, imageUrls
         );

@@ -21,10 +21,26 @@ public class InstaPrompt {
     @Column(nullable = false)
     private Category category;
 
+    /** 키워드 Top-N: [{"token":"쑥","score":0.41}, ...] */
     @Lob
     @Column(nullable = false, columnDefinition = "LONGTEXT")
-    private String content;
+    private String topKeywords;
 
+    /** 이모지 비율(0.0~1.0) */
+    @Column(nullable = false)
+    private Double emojiRatio;
+
+    /** 해시태그 수(평균/대표값을 정수로 보관) */
+    @Column(nullable = false)
+    private Integer hashtagCount;
+
+    /** 문장 길이 분포 히스토그램: {"bins":[0,20,40,...],"counts":[...]} */
     @Lob
-    private String tags;
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private String sentenceLenHistJson;
+
+    /** CTA 유형 분포: [{"type":"visit","ratio":0.32}, {"type":"follow","ratio":0.18}, ...] */
+    @Lob
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private String ctaTypesJson;
 }
