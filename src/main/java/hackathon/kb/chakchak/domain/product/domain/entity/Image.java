@@ -6,20 +6,19 @@ import lombok.*;
 @Entity
 @Getter
 @Builder
-@Table(name = "tag")
+@Table(name = "image")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Tag {
+public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tag_id")
+    @Column(name = "image_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @Column(nullable = false)
-    private String name;
+    private String url;
 }

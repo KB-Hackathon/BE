@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,6 +31,12 @@ public class Product extends BaseEntity {
 	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
 	private List<Order> orders;
 
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<Image> images;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<Tag> tags;
+
 	@Column(nullable = false)
 	private Long endCaptureId;
 
@@ -39,10 +44,7 @@ public class Product extends BaseEntity {
 	private String title;
 
 	@Enumerated(EnumType.STRING)
-	private Category category; // DB ENUM 매핑(값은 프로젝트 상황에 맞게 조정)
-
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Tag> tags = new ArrayList<>();
+	private Category category;
 
 	@Column(nullable = false)
 	private Long price;
