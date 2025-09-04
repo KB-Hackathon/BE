@@ -1,7 +1,7 @@
 package hackathon.kb.chakchak.domain.member.repository;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Member;
-import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,7 +28,8 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
                company_phone_number         = :companyPhoneNumber,
                zip_code                     = :zipCode,
                road_name_address            = :roadNameAddress,
-               company_classification_code  = :companyClassificationCode
+               company_classification_code  = :companyClassificationCode,
+                adm_cd                      = :admCd
          WHERE member_id = :memberId
         """, nativeQuery = true)
 
@@ -42,6 +43,11 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
             @Param("companyPhoneNumber") String companyPhoneNumber,
             @Param("zipCode") String zipCode,
             @Param("roadNameAddress") String roadNameAddress,
-            @Param("companyClassificationCode") String companyClassificationCode
+            @Param("companyClassificationCode") String companyClassificationCode,
+            @Param("admCd") String admCd
     );
+
+    // @Modifying(clearAutomatically = true)
+    // @Query("UPDATE Seller s SET s.admCd = :admCd WHERE s.id = :sellerId")
+    // int updateSellerAdmCd(@Param("sellerId") Long sellerId, @Param("admCd") String admcd);
 }

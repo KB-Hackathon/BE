@@ -33,6 +33,16 @@ spring:
     base_url: ${APICK_BASE_URL}
     auth_key: ${APICK_AUTH_KEY}
 
+  openai:
+    api:
+      key: ${OPENAI_API_KEY}
+      url: ${OPENAI_API_URL}
+      model: ${OPENAI_API_MODEL}
+
+  juso:
+    base-url: ${JUSO_ADMCD_BASE_URL}
+    api-key: ${JUSO_ADMCD_API_KEY}
+
   security:
     oauth2:
       client:
@@ -50,12 +60,6 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-
-  openai:
-    api:
-      key: ${OPENAI_API_KEY}
-      url: ${OPENAI_API_URL}
-      model: ${OPENAI_API_MODEL}
 
 jwt:
   secret: ${JWT_SECRET}

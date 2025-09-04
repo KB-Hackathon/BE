@@ -20,7 +20,7 @@ public class MemberRolePromotionService {
     private final EntityManager em;
 
     @Transactional
-    public Seller promoteBuyerToSeller(Long memberId, ApickBizDetailResponse.Data d) {
+    public Seller promoteBuyerToSeller(Long memberId, ApickBizDetailResponse.Data d, String admCd) {
         int rows = memberRepository.promoteBuyerToSeller(
                 memberId,
                 digits(d.getBizNo(), 20),
@@ -31,7 +31,8 @@ public class MemberRolePromotionService {
                 digits(d.getPhoneNumber(), 11),
                 digits(d.getZipCode(), 5),
                 d.getRoadNameAddress(),
-                digits(d.getCompanyClassificationCode(), 6)
+                digits(d.getCompanyClassificationCode(), 6),
+                admCd
         );
         if (rows != 1) throw new BusinessException(ResponseCode.CONFLICT);
 
