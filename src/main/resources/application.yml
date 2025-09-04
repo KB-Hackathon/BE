@@ -61,6 +61,12 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    ssl:
+      enabled: ${SSL_ENABLED}
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity-seconds: 1800 # 1800초 = 30분
@@ -89,3 +95,6 @@ cloud:
       bucket: ${BUCKET_NAME}
     region:
       static: ${REGION}
+
+kakao:
+  admin-key: ${ADMIN}
