@@ -7,6 +7,6 @@ import lombok.Data;
 public class ProductMetaRequest {
     private String title;
     private Category category;
-    private String description;
+    private String summary;
 }
 

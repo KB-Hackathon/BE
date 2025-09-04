@@ -48,7 +48,7 @@ public class ProductNarrativeService {
                 .title(meta.getTitle())
                 .category(meta.getCategory())
                 .price(0L) // 기본값(업데이트 예정)
-                .description(meta.getDescription())
+                .description(meta.getSummary()) // 기본값(업데이트 예정)
                 .status(ProductStatus.DRAFT) // 임시 상태
                 .targetAmount(null) // 기본값(업데이트 예정)
                 .recruitmentStartPeriod(now) // 기본값(업데이트 예정)
@@ -126,10 +126,10 @@ public class ProductNarrativeService {
                     - 카테고리: %s
                     - 설명: %s
                 """.formatted(
-                "스타벅스 합정점", // seller.getCompanyName()
+                seller.getCompanyName(),
                 meta.getTitle(),
                 meta.getCategory(),
-                meta.getDescription()
+                meta.getSummary()
         );
 
         // 6) GPT 호출
