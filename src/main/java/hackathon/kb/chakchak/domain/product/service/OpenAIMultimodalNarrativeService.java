@@ -2,6 +2,7 @@ package hackathon.kb.chakchak.domain.product.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hackathon.kb.chakchak.domain.product.service.dto.NarrativeResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -9,10 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +25,10 @@ public class OpenAIMultimodalNarrativeService {
     @Value("${openai.api.url}")
     private String apiUrl;
 
-    @Value("${openai.api.model:gpt-4o-mini-2024-07-18}")
+    @Value("${openai.api.model}")
     private String model;
 
-    /**
-     * 이미지(URL) + 텍스트를 입력으로 받아 “하나의 줄글”을 생성한다.
-     */
-    public String generateNarrativeWithImageUrls(
+    public NarrativeResult generateNarrativeWithImageUrls(
             String systemInstruction,
             String userText,
             List<String> imageUrls
@@ -57,7 +52,8 @@ public class OpenAIMultimodalNarrativeService {
             }
         }
 
-        return callOnce(systemInstruction, userParts);
+        String raw = callOnce(systemInstruction, userParts);
+        return tryParseJsonResult(raw);
     }
 
     /**
@@ -154,5 +150,47 @@ public class OpenAIMultimodalNarrativeService {
         } catch (Exception ignore) {
             return null;
         }
+    }
+
+    // JSON 파서
+    private NarrativeResult tryParseJsonResult(String respText) {
+        String text = tryParseResponsesApi(respText);
+        if (text == null || text.isBlank()) {
+            text = respText; // 모델이 곧장 JSON만 준 경우 대비
+        }
+        try {
+            JsonNode root = objectMapper.readTree(text.trim());
+            String caption = Optional.ofNullable(root.path("caption").asText(null)).orElse("").trim();
+
+            String hashtagsRaw = root.path("hashtags").asText(null);
+            List<String> hashtags = parseHashtags(hashtagsRaw);
+
+            return new NarrativeResult(caption, hashtags);
+        } catch (Exception e) {
+            log.warn("JSON 파싱 실패, 원문 반환 시도: {}", e.toString());
+            return new NarrativeResult(text == null ? "" : text.trim(), Collections.emptyList());
+        }
+    }
+
+    private List<String> parseHashtags(String hashtagsRaw) {
+        if (hashtagsRaw == null || hashtagsRaw.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        // 공백으로 분리, "#" 없는 토큰은 무시
+        String[] tokens = hashtagsRaw.trim().split("\\s+");
+        List<String> hashtags = new ArrayList<>();
+
+        for (String token : tokens) {
+            if (!token.isBlank()) {
+                // 앞에 # 없으면 붙여줌
+                if (!token.startsWith("#")) {
+                    token = "#" + token;
+                }
+                hashtags.add(token);
+            }
+        }
+
+        return hashtags;
     }
 }
