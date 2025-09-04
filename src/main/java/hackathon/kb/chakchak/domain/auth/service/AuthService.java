@@ -1,5 +1,6 @@
 package hackathon.kb.chakchak.domain.auth.service;
 
+import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.jwt.util.CookieIssuer;
 import hackathon.kb.chakchak.domain.jwt.util.JwtIssuer;
 import hackathon.kb.chakchak.domain.member.api.dto.req.AdditionalInfoRequest;
@@ -9,7 +10,9 @@ import hackathon.kb.chakchak.domain.member.domain.enums.MemberRole;
 import hackathon.kb.chakchak.domain.member.domain.enums.SocialType;
 import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
 import hackathon.kb.chakchak.domain.auth.service.dto.SignupTokens;
+import hackathon.kb.chakchak.domain.member.service.MemberService;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
+import hackathon.kb.chakchak.global.oauth.kakao.service.KakaoApiClient;
 import hackathon.kb.chakchak.global.redis.util.RedisUtil;
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import io.jsonwebtoken.Claims;
@@ -35,6 +38,66 @@ public class AuthService {
     private final JwtIssuer jwtIssuer;
     private final RedisUtil redisUtil;
     private final CookieIssuer cookieIssuer;
+    private final MemberService memberService;
+    private final KakaoApiClient kakaoApiClient;
+
+    public ResponseEntity<?> withdraw(MemberPrincipal principal,
+                                      String authorization,
+                                      HttpServletRequest request) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Long memberId = principal.getId();
+
+        Member member = memberRepository.findById(memberId).orElse(null);
+        if (member == null) {
+            return ResponseEntity.status(401).body(Map.of("msg", "USER_NOT_FOUND"));
+        }
+
+        // 카카오 Unlink (Admin 키)
+        try {
+            kakaoApiClient.unlinkByAdminKey(member.getKakaoId());
+        } catch (Exception e) {
+            log.warn("Kakao unlink failed (will proceed anyway): {}", e.getMessage());
+        }
+
+        // 우리 서비스 탈퇴 처리 (soft delete)
+        memberService.deleteMember(memberId);
+
+        // Access 토큰 블랙리스트 (남은 TTL → 분 단위 올림)
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            String access = authorization.substring(7);
+            try {
+                Claims accessClaims = jwtIssuer.parseJws(access).getBody();
+                long secLeft = Math.max(1L,
+                        (accessClaims.getExpiration().getTime() - System.currentTimeMillis()) / 1000L);
+                int minutes = (int) Math.max(1L, (secLeft + 59) / 60); // ceil & 최소 1분
+                redisUtil.setBlackList(access, "accessToken", minutes);
+            } catch (ExpiredJwtException e) {
+                log.debug("access token already expired");
+            } catch (JwtException e) {
+                log.debug("invalid access token on withdraw: {}", e.getMessage());
+            }
+        }
+
+        // Refresh 토큰 블랙리스트 + 쿠키 삭제
+        String refresh = extractRefreshCookie(request);
+        if (refresh != null && !refresh.isBlank()) {
+            try {
+                Claims claims = jwtIssuer.parseJws(refresh).getBody();
+                long secLeft = Math.max(1L,
+                        (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000L);
+                int minutes = (int) Math.max(1L, (secLeft + 59) / 60);
+                redisUtil.setBlackList(refresh, "refreshToken", minutes);
+            } catch (JwtException ignore) { /* 이미 무효여도 무시 */ }
+        }
+        ResponseCookie deleteCookie = cookieIssuer.delete(); // Max-Age=0 등
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(Map.of("status", "OK"));
+    }
 
     @Transactional
     public SignupTokens completeSignup(AdditionalInfoRequest req) {
@@ -166,4 +229,7 @@ public class AuthService {
             log.warn("failed to delete refresh cookie", ex);
         }
     }
+
+
+
 }
