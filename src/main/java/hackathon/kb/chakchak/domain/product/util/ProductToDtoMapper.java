@@ -1,9 +1,11 @@
 package hackathon.kb.chakchak.domain.product.util;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
+import hackathon.kb.chakchak.domain.order.domain.entity.Order;
 import hackathon.kb.chakchak.domain.product.domain.dto.ImageReadResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.dto.ProductMemberReadResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.dto.ProductReadResponseDto;
@@ -15,6 +17,7 @@ import hackathon.kb.chakchak.domain.product.domain.entity.Tag;
 public class ProductToDtoMapper {
 
 	public static ProductReadResponseDto productToProductReadResponseDto(Product product) {
+		Short presentPersonCount = getPresentPersonCount(product.getOrders());
 		return ProductReadResponseDto.builder()
 			.productId(product.getId())
 			.category(product.getCategory())
@@ -27,6 +30,8 @@ public class ProductToDtoMapper {
 			.recruitmentStartPeriod(product.getRecruitmentStartPeriod())
 			.seller(memberToProductMemberReadResponseDto(product.getSeller()))
 			.targetAmount(product.getTargetAmount())
+			.presentPersonCount(presentPersonCount)
+			.totalPrice(getTotalPrice(presentPersonCount, product.getPrice()))
 			.build();
 	}
 
@@ -48,5 +53,17 @@ public class ProductToDtoMapper {
 
 	public static ProductMemberReadResponseDto memberToProductMemberReadResponseDto(Seller seller) {
 		return new ProductMemberReadResponseDto(seller.getId(), seller.getCompanyName(), seller.getRepName(), seller.getCompanyPhoneNumber(), seller.getRoadNameAddress());
+	}
+
+	private static Short getPresentPersonCount(List<Order> orders){
+		Short presentPersonCount = 0;
+		for (Order order : orders) {
+			presentPersonCount = (short)(presentPersonCount + order.getQuantity());
+		}
+		return presentPersonCount;
+	}
+
+	private static BigDecimal getTotalPrice(Short presentPersonCount, BigDecimal price) {
+		return price.multiply(new BigDecimal(presentPersonCount));
 	}
 }
