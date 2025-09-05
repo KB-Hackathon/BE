@@ -3,7 +3,8 @@ package hackathon.kb.chakchak.domain.member.domain.entity;
 import java.util.List;
 
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
-import hackathon.kb.chakchak.domain.review.domain.entity.Review;
+import hackathon.kb.chakchak.domain.report.domain.entity.Report;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -11,10 +12,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -23,8 +22,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor @AllArgsConstructor @SuperBuilder
 public class Seller extends Member {
 
-	@OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)
-	private List<Review> reviews;
+	@OneToOne(mappedBy = "seller", fetch = FetchType.LAZY,
+				cascade = CascadeType.ALL, orphanRemoval = true)
+	private Report sellerReport;
 
 	@OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)
 	private List<Product> products;
