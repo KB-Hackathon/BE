@@ -1,4 +1,4 @@
-package hackathon.kb.chakchak.domain.member.api.dto;
+package hackathon.kb.chakchak.domain.member.api.dto.req;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
