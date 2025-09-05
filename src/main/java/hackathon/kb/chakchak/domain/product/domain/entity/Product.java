@@ -10,6 +10,7 @@ import hackathon.kb.chakchak.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class Product extends BaseEntity {
 	private Category category;
 
 	@Column(nullable = false)
-	private Long price;
+	private BigDecimal price;
 
 	@Lob
 	@Column(columnDefinition = "LONGTEXT", nullable = false)

@@ -4,6 +4,7 @@ import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,13 +23,17 @@ public record ProductReadResponseDto(
 	@Schema(description = "상품 카테고리", example = "의류")
 	Category category,
 	@Schema(description = "상품 가격", example = "1000000")
-	Long price,
+	BigDecimal price,
 	@Schema(description = "상품 설명", example = "이쁜 옷")
 	String description,
 	@Schema(description = "쿠폰 사용 가능 여부", example = "true")
 	Boolean isCoupon,
 	@Schema(description = "목표 모집 회원 수", example = "30")
 	Short targetAmount,
+	@Schema(description = "참여중인 인원", example = "22")
+	Short presentPersonCount,
+	@Schema(description = "현재 달성 액수", example = "34200000")
+	BigDecimal totalPrice,
 	@Schema(description = "모집 시작 기간", example = "2025-09-01T10:00:00")
 	LocalDateTime recruitmentStartPeriod,
 	@Schema(description = "모집 종료 기간", example = "2025-09-01T10:00:00")

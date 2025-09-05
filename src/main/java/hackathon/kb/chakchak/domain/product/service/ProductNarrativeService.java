@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class ProductNarrativeService {
                 .endCaptureId(0L) // 기본값(업데이트 예정)
                 .title(meta.getTitle())
                 .category(meta.getCategory())
-                .price(0L) // 기본값(업데이트 예정)
+                .price(BigDecimal.valueOf(0L)) // 기본값(업데이트 예정)
                 .description(meta.getSummary()) // 기본값(업데이트 예정)
                 .status(ProductStatus.DRAFT) // 임시 상태
                 .targetAmount(null) // 기본값(업데이트 예정)
