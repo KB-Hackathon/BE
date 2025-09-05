@@ -52,7 +52,7 @@ public class Product extends BaseEntity {
 	private boolean isCoupon;
 
 	@Lob
-	@Column(nullable = false)
+	@Column(columnDefinition = "LONGTEXT", nullable = false)
 	private String description;
 
 	@Enumerated(EnumType.STRING)
