@@ -1,5 +1,7 @@
 package hackathon.kb.chakchak.domain.product.domain.entity;
 
+import org.hibernate.annotations.BatchSize;
+
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.order.domain.entity.Order;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
@@ -29,12 +31,15 @@ public class Product extends BaseEntity {
 	private Seller seller;
 
 	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+	@BatchSize(size = 100)
 	private List<Order> orders;
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+	@BatchSize(size = 100)
 	private List<Image> images;
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+	@BatchSize(size = 100)
 	private List<Tag> tags;
 
 	@Column(nullable = false)
