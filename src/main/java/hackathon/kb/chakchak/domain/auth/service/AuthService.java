@@ -9,7 +9,7 @@ import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.member.domain.enums.MemberRole;
 import hackathon.kb.chakchak.domain.member.domain.enums.SocialType;
 import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
-import hackathon.kb.chakchak.domain.auth.service.dto.SignupTokens;
+import hackathon.kb.chakchak.domain.auth.service.dto.TokensResponse;
 import hackathon.kb.chakchak.domain.member.service.MemberService;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.oauth.kakao.service.KakaoApiClient;
@@ -70,7 +70,7 @@ public class AuthService {
                 int minutes = (int) Math.max(1L, (secLeft + 59) / 60); // ceil & 최소 1분
                 redisUtil.setBlackList(access, "accessToken", minutes);
             } catch (ExpiredJwtException e) {
-                log.debug("access token already expired");
+                throw new BusinessException(ResponseCode.TOKEN_EXPIRED);
             } catch (JwtException e) {
                 log.debug("invalid access token on withdraw: {}", e.getMessage());
             }
@@ -90,13 +90,13 @@ public class AuthService {
     }
 
     @Transactional
-    public SignupTokens completeSignup(AdditionalInfoRequest req) {
+    public TokensResponse completeSignup(AdditionalInfoRequest req) {
         // signupToken 검증
         Claims claims = jwtIssuer.parseJws(req.getSignupToken()).getBody();
         String typ = claims.get("typ", String.class);
 
         if (!"signup".equals(typ)) {
-            throw new BusinessException(ResponseCode.SIGNUP_TOKEN_INVALID);
+            throw new BusinessException(ResponseCode.TOKEN_INVALID);
         }
 
         Long kakaoId = ((Number) claims.get("kakaoId")).longValue();
@@ -128,23 +128,18 @@ public class AuthService {
         String access = jwtIssuer.createAccessToken(saved.getId(), saved.getRole().name());
         String refresh = jwtIssuer.createRefreshToken(saved.getId());
 
-        return new SignupTokens(access, refresh);
+        return new TokensResponse(access, refresh);
     }
 
-    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+    public TokensResponse refresh(HttpServletRequest request, HttpServletResponse response) {
         String refresh = extractRefreshCookie(request);
 
-        if (refresh == null || refresh.isBlank()) {
-            return ResponseEntity.status(401).body(Map.of("code", "NO_REFRESH_COOKIE"));
-        }
+        if (refresh == null || refresh.isBlank()) throw new BusinessException(ResponseCode.TOKEN_MISSING);
 
         try {
             Claims claims = jwtIssuer.parseJws(refresh).getBody();
             String typ = claims.get("typ", String.class);
-            if (!"refresh".equals(typ)) {
-                deleteRefreshTokenFromCookie(response);
-                return ResponseEntity.status(401).body(Map.of("msg", "NOT_REFRESH_TOKEN"));
-            }
+            if (!"refresh".equals(typ)) throw new BusinessException(ResponseCode.TOKEN_INVALID);
 
             Long memberId = Long.valueOf(claims.getSubject());
 
@@ -153,16 +148,16 @@ public class AuthService {
 
             if (savedRefreshToken == null || !savedRefreshToken.equals(refresh)) {
                 deleteRefreshTokenFromCookie(response);
-                return ResponseEntity.status(401).body(Map.of("msg", "유효하지 않은 refresh 토큰"));
+                throw new BusinessException(ResponseCode.REFRESH_REPLAY);
             }
 
-            // 회전: 기존 저장본 삭제
+            // 기존 저장본 삭제(삭제 후 재저장)
             redisUtil.delete("refresh:" + memberId);
 
             Member member = memberRepository.findById(memberId).orElse(null);
             if (member == null) {
                 deleteRefreshTokenFromCookie(response);
-                return ResponseEntity.status(401).body(Map.of("msg", "USER_NOT_FOUND"));
+                throw new BusinessException(ResponseCode.UNAUTHORIZED);
             }
 
             // 새 토큰 발급
@@ -172,12 +167,9 @@ public class AuthService {
             // 새 리프레시 저장
             redisUtil.set("refresh:" + member.getId(), newRefresh);
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookieIssuer.build(newRefresh).toString())
-                    .body(Map.of("accessToken", newAccess));
+            return new TokensResponse(newAccess, newRefresh);
 
         } catch (ExpiredJwtException e) {
-            log.debug("REFRESH expired", e);
             // 만료: Redis에서 해당 사용자 refresh 제거 + 쿠키 삭제 → 401
             try {
                 Claims expired = e.getClaims();
@@ -186,17 +178,18 @@ public class AuthService {
                     redisUtil.delete("refresh:" + memberId);
                 }
             } catch (Exception ignore) { }
+
             deleteRefreshTokenFromCookie(response);
-            return ResponseEntity.status(401).body(Map.of("code", "REFRESH_EXPIRED"));
+            throw new BusinessException(ResponseCode.TOKEN_EXPIRED);
 
         } catch (JwtException e) {
             log.debug("REFRESH invalid", e);
             deleteRefreshTokenFromCookie(response);
-            return ResponseEntity.status(401).body(Map.of("code", "REFRESH_INVALID"));
+            throw new BusinessException(ResponseCode.TOKEN_INVALID);
         } catch (IllegalArgumentException e) {
             log.debug("REFRESH illegal arg", e);
             deleteRefreshTokenFromCookie(response);
-            return ResponseEntity.status(401).body(Map.of("code", "REFRESH_ILLEGAL_ARGUMENT"));
+            throw new BusinessException(ResponseCode.TOKEN_INVALID);
         }
     }
 
