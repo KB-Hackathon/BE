@@ -1,8 +1,8 @@
 package hackathon.kb.chakchak.domain.member.api.controller;
 
 import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
-import hackathon.kb.chakchak.domain.member.api.dto.BizRegisterRequest;
-import hackathon.kb.chakchak.domain.member.api.dto.BizRegisterResponse;
+import hackathon.kb.chakchak.domain.member.api.dto.req.BizRegisterRequest;
+import hackathon.kb.chakchak.domain.member.api.dto.res.BizRegisterResponse;
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.member.service.SellerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
