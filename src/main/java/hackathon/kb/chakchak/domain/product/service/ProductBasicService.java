@@ -1,23 +1,22 @@
 package hackathon.kb.chakchak.domain.product.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.coyote.BadRequestException;
+import hackathon.kb.chakchak.domain.product.domain.dto.ProductReadResponseDto;
+import hackathon.kb.chakchak.domain.product.domain.entity.Product;
+import hackathon.kb.chakchak.domain.product.domain.enums.Category;
+import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
+import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
+import hackathon.kb.chakchak.domain.product.util.ProductToDtoMapper;
+import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
+import hackathon.kb.chakchak.global.response.ResponseCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import hackathon.kb.chakchak.domain.product.domain.dto.ProductReadResponseDto;
-import hackathon.kb.chakchak.domain.product.domain.entity.Product;
-import hackathon.kb.chakchak.domain.product.domain.enums.Category;
-import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
-import hackathon.kb.chakchak.domain.product.util.ProductToDtoMapper;
-import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
-import hackathon.kb.chakchak.global.response.ResponseCode;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -35,7 +34,11 @@ public class ProductBasicService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ProductReadResponseDto> getProductsByCategory(Category category, int page) {
+	public List<ProductReadResponseDto> getProductsByOptions(
+			Category category,
+			ProductStatus status,
+			Boolean isCoupon,
+			int page) {
 		Pageable pageable = PageRequest.of(
 			page,
 			10,
@@ -43,7 +46,7 @@ public class ProductBasicService {
 		);
 
 		return productRepository
-			.findByCategory(category, pageable)
+			.findByOptions(category, status, isCoupon, pageable)
 			.getContent()
 			.stream()
 			.map(ProductToDtoMapper::productToProductReadResponseDto)
