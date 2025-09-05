@@ -1,7 +1,7 @@
 package hackathon.kb.chakchak.global.security.config;
 
 import hackathon.kb.chakchak.domain.jwt.filter.JwtAuthenticationFilter;
-import hackathon.kb.chakchak.global.ouath.kakao.service.KakaoOAuth2UserService;
+import hackathon.kb.chakchak.global.oauth.kakao.service.KakaoOAuth2UserService;
 import hackathon.kb.chakchak.global.security.handler.JsonAccessDeniedHandler;
 import hackathon.kb.chakchak.global.security.handler.JsonAuthenticationEntryPoint;
 import hackathon.kb.chakchak.global.security.handler.OAuth2FailureHandler;
@@ -48,8 +48,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/api-docs/**",
                                 "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/oauth/signup/complete").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/oauth/signup/additional").permitAll() // 회원가입 시 추가 정보
+                        .anyRequest().permitAll()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jsonAuthenticationEntryPoint) // 401

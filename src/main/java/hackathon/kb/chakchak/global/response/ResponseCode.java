@@ -21,8 +21,13 @@ public enum ResponseCode {
 	SIGNUP_TOKEN_INVALID("OAUTH-001", HttpStatus.BAD_REQUEST, "Invalid signup token"),
 	SIGNUP_TOKEN_EXPIRED("OAUTH-002", HttpStatus.UNAUTHORIZED, "Signup token expired"),
 	SIGNUP_NOT_REQUIRED("OAUTH-003", HttpStatus.CONFLICT, "Signup not required"),
-  
-  ;
+
+	//MEMBER
+	MEMBER_NOT_FOUND("MEM-001", HttpStatus.NOT_FOUND, "Member not found"),
+
+	// COUPON
+	COUPON_NOT_FOUND("CPN-001", HttpStatus.NOT_FOUND, "Coupon not found"),
+	;
 
 	private final String code;
 	private final HttpStatus status;

@@ -1,12 +1,15 @@
 package hackathon.kb.chakchak.domain.member.api.controller;
 
+import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.member.api.dto.BizRegisterRequest;
 import hackathon.kb.chakchak.domain.member.api.dto.BizRegisterResponse;
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.member.service.SellerService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,15 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/api/sellers")
 @RequiredArgsConstructor
+@Tag(name = "사업자 등록 API", description = "에이픽 API와 주소 API 호출 후 사업자 등록 번호 확인 및 행정동 코드 추출 API")
 public class SellerController {
     private final SellerService sellerService;
 
     @PostMapping("/register")
     public ResponseEntity<BizRegisterResponse> register(
-            @Valid @RequestBody BizRegisterRequest req
-            // todo @AuthenticationPrincipal CustomUser customUser 추가
+            @Valid @RequestBody BizRegisterRequest req,
+            @AuthenticationPrincipal MemberPrincipal principal
     ) {
-        Seller saved = sellerService.updateSellerFromApick(req.getBizNo(), 4L); /// todo customUser 정보 받아오도록 수정
+        Seller saved = sellerService.updateSellerFromApick(req.getBizNo(), principal.getId());
         return ResponseEntity.ok(BizRegisterResponse.from(saved));
     }
 }

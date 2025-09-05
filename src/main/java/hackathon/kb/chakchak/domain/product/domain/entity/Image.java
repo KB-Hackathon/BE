@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
 @Entity
 @Getter
 @Builder
@@ -33,4 +34,5 @@ public class Image {
 	private Product product;
 
 	private String url;
+
 }

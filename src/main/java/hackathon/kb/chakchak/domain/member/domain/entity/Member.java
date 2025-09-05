@@ -1,5 +1,6 @@
 package hackathon.kb.chakchak.domain.member.domain.entity;
 
+import hackathon.kb.chakchak.domain.member.domain.enums.Gender;
 import hackathon.kb.chakchak.domain.member.domain.enums.MemberRole;
 import hackathon.kb.chakchak.domain.member.domain.enums.SocialType;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
@@ -18,6 +19,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -25,6 +27,7 @@ import lombok.experimental.SuperBuilder;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "inheritance_type", discriminatorType = DiscriminatorType.STRING)
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
@@ -42,6 +45,9 @@ public abstract class Member extends BaseEntity {
 	private Short age;
 
 	@Column(nullable = false)
+	private Gender gender;
+
+	@Column(nullable = false)
 	private String address;
 
 	@Column(length = 11)
@@ -51,7 +57,8 @@ public abstract class Member extends BaseEntity {
 	@Column(nullable = false)
 	private SocialType social;
 
-	@Column(length = 200, nullable = false)
+//	@Column(length = 200, nullable = false)
+	@Column(length = 200) // 아직 알림 구현 전이라서 해당 부분이 not null이면 에러가 발생합니다. fcm 구현 후에 주석 풀어주세요.
 	private String fcmToken;
 
 	@Enumerated(EnumType.STRING)

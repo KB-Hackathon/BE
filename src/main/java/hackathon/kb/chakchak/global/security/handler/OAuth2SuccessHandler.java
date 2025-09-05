@@ -1,19 +1,19 @@
 package hackathon.kb.chakchak.global.security.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hackathon.kb.chakchak.domain.jwt.util.JwtIssuer;
 import hackathon.kb.chakchak.domain.jwt.util.CookieIssuer;
 import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
+import hackathon.kb.chakchak.global.redis.util.RedisUtil;
 import hackathon.kb.chakchak.global.security.CustomKakaoOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -26,8 +26,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final MemberRepository memberRepository;
     private final JwtIssuer jwtIssuer;
-    private final CookieIssuer refreshCookieSupport;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final CookieIssuer cookieIssuer;
+    private final RedisUtil redisUtil;
+
+    @Value("${base.url}")
+    private String baseURI;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -43,7 +46,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         invalidateSession(request, response); // 세션 정리
 
         Optional<Member> member = memberRepository.findByKakaoId(kakaoId);
-        log.info("우리의 DB에서 해당 사용자가 존재하는지 확인힙니다.: {}", member);
+        log.info("우리의 DB에서 해당 사용자가 존재하는지 확인합니다.: {}", member);
 
         if (member.isPresent()) {
             Member m = member.get();
@@ -51,23 +54,25 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             String access = jwtIssuer.createAccessToken(m.getId(), m.getRole().name());
             String refresh = jwtIssuer.createRefreshToken(m.getId());
 
-            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookieSupport.build(refresh).toString());
+            // refresh 토큰 redis에 저장
+            redisUtil.set("refresh:" + m.getId(), refresh);
 
-            objectMapper.writeValue(response.getWriter(), Map.of(
-                    "registered", true,
-                    "accessToken", access
-            ));
+            response.addHeader(HttpHeaders.SET_COOKIE, cookieIssuer.build(refresh).toString());
+
+            String redirectUri = baseURI + "/auth/signIn/success";
+            String redirectUrl = String.format("%s?access_token=%s", redirectUri, access);
+            response.sendRedirect(redirectUrl);
             return;
         }
 
         // 신규 회원 — 추가 필수 항목을 우리 폼에서 받아야 함
         String signupToken = jwtIssuer.createSignupToken(kakaoId);
-        log.info("[SIGNUP] need more info(name, age, address). kakaoId={}", kakaoId);
+        log.info("[SIGNUP] need more info. kakaoId={}", kakaoId);
 
-        objectMapper.writeValue(response.getWriter(), Map.of(
-                "registered", false,
-                "signupToken", signupToken
-        ));
+        String redirectUri = baseURI + "/auth/signUp/additional";
+        String redirectUrl = String.format("%s?signup_token=%s", redirectUri, signupToken);
+        response.sendRedirect(redirectUrl);
+
     }
 
     private void invalidateSession(HttpServletRequest request, HttpServletResponse response) {

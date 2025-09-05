@@ -12,6 +12,10 @@ import org.springframework.stereotype.Repository;
 
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
+import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
+import hackathon.kb.chakchak.domain.product.domain.entity.Product;
+
+import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -25,4 +29,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	@EntityGraph(attributePaths = {"seller"})
 	Page<Product> findByCategory(Category category, Pageable pageable);
+         
+	Optional<Product> findById(long id);
+
+	List<Product> findBySeller(Seller seller);
 }

@@ -1,4 +1,4 @@
-package hackathon.kb.chakchak.global.ouath.kakao.service;
+package hackathon.kb.chakchak.global.oauth.kakao.service;
 
 import hackathon.kb.chakchak.global.security.CustomKakaoOAuth2User;
 import java.util.Collection;

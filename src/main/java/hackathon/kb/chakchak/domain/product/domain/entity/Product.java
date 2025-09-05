@@ -1,8 +1,5 @@
 package hackathon.kb.chakchak.domain.product.domain.entity;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import org.hibernate.annotations.BatchSize;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
@@ -10,24 +7,11 @@ import hackathon.kb.chakchak.domain.order.domain.entity.Order;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -70,8 +54,10 @@ public class Product extends BaseEntity {
 	@Column(nullable = false)
 	private Long price;
 
+	private boolean isCoupon;
+
 	@Lob
-	@Column(nullable = false)
+	@Column(columnDefinition = "LONGTEXT", nullable = false)
 	private String description;
 
 	@Enumerated(EnumType.STRING)
@@ -88,4 +74,41 @@ public class Product extends BaseEntity {
 	private Short refreshCnt;
 
 	private LocalDateTime refreshedAt;
+
+
+	// ====== 변경 메서드 (업데이트 전용) ======
+
+	public void changeEndCaptureId(Long id) {
+		this.endCaptureId = id;
+	}
+
+	public void changeDescription(String description) {
+		if (description != null) this.description = description;
+	}
+
+	public void changePrice(Long price) {
+		if (price != null) this.price = price;
+	}
+
+	// boolean 필드는 null-safe 입력 메서드로
+	public void changeCoupon(Boolean isCoupon) {
+		if (isCoupon != null) this.isCoupon = isCoupon;
+	}
+
+	public void changeTargetAmount(Short targetAmount) {
+		if (targetAmount != null) this.targetAmount = targetAmount;
+	}
+
+	public void changeRecruitmentPeriods(LocalDateTime start, LocalDateTime end) {
+		if (start != null) this.recruitmentStartPeriod = start;
+		if (end != null) this.recruitmentEndPeriod = end;
+	}
+
+	public void markPending() {
+		this.status = ProductStatus.PENDING;
+	}
+
+	public void touchRefreshedAt(LocalDateTime now) {
+		this.refreshedAt = now;
+	}
 }
