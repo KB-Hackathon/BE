@@ -5,11 +5,12 @@ import hackathon.kb.chakchak.domain.jwt.util.CookieIssuer;
 import hackathon.kb.chakchak.domain.member.api.dto.req.AdditionalInfoRequest;
 import hackathon.kb.chakchak.domain.auth.service.AuthService;
 import hackathon.kb.chakchak.domain.auth.service.dto.SignupTokens;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/oauth")
 @RequiredArgsConstructor
-@Slf4j
+@Tag(name = "회원 관리 API", description = "회원 관리 API")
 public class OauthController {
 
     private final CookieIssuer refreshCookieSupport;
@@ -43,6 +44,7 @@ public class OauthController {
     @Value("${auth.cookie.secure}")
     private boolean cookieSecure;
 
+    @Operation(summary = "신규 사용자 추가 정보 받기", description = "사용자로부터 추가 정보를 받아 저장합니다.")
     @PostMapping("/signup/additional")
     public ResponseEntity<?> complete(@Valid @RequestBody AdditionalInfoRequest req) {
         SignupTokens tokens = oauthService.completeSignup(req);
@@ -55,6 +57,7 @@ public class OauthController {
                 ));
     }
 
+    @Operation(summary = "서비스 탈퇴", description = "서비스 탈퇴를 진행합니다.")
     @DeleteMapping("/member")
     public ResponseEntity<?> withdraw(
             @AuthenticationPrincipal MemberPrincipal principal,
