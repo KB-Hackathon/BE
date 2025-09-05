@@ -6,6 +6,7 @@ import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveRequest;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveResponse;
 import hackathon.kb.chakchak.domain.product.domain.dto.ProductReadResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
+import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
 import hackathon.kb.chakchak.domain.product.service.OpenAIMultimodalNarrativeService;
 import hackathon.kb.chakchak.domain.product.service.ProductBasicService;
 import hackathon.kb.chakchak.domain.product.service.ProductCommandService;
@@ -39,13 +40,16 @@ public class ProductController {
         return BaseResponse.OK(productNarrativeService.createNarrative(principal.getId(), meta));
     }
 
-    @Operation(summary = "카테고리별 조회", description = "카테고리별 상품을 조회합니다. 10개를 반환하도록 하였습니다.")
-    @GetMapping("/category/{category}")
-    public BaseResponse<List<ProductReadResponseDto>> listByCategory(
-        @PathVariable Category category,
-        @RequestParam(defaultValue = "0") int page) {
-        return BaseResponse.OK(productBasicService.getProductsByCategory(category, page));
+    @Operation(summary = "카테고리 / 모집상태 / 거래방식별 조회", description = "카테고리 / 모집상태 / 거래방식별 상품을 조회합니다. 10개를 반환하도록 하였습니다.")
+    @GetMapping
+    public BaseResponse<List<ProductReadResponseDto>> listByOption(
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) ProductStatus status,
+            @RequestParam(required = false) Boolean isCoupon,
+            @RequestParam(defaultValue = "0") int page) {
+        return BaseResponse.OK(productBasicService.getProductsByOptions(category, status, isCoupon, page));
     }
+
 
     @Operation(summary = "상품 아이디 기반 조회", description = "상품 아이디를 기반으로 한 개 상품의 정보를 조회합니다.")
     @GetMapping("/{productId}")
