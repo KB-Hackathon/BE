@@ -9,9 +9,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class NarrativeResult {
-    @Schema(description = "상품 ID", example = "12")
-    private final Long productId;
-
     @Schema(description = "상품 상세 설명 (홍보글)", example = "여름의 시작을 알리는 특별한 순간...")
     private final String caption;
 

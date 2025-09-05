@@ -3,23 +3,17 @@ package hackathon.kb.chakchak.domain.product.service;
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.member.repository.SellerRepository;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductMetaRequest;
-import hackathon.kb.chakchak.domain.product.domain.entity.Image;
 import hackathon.kb.chakchak.domain.product.domain.entity.InstaPrompt;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
-import hackathon.kb.chakchak.domain.product.repository.ImageRepository;
 import hackathon.kb.chakchak.domain.product.repository.InstaPromptRepository;
 import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
 import hackathon.kb.chakchak.domain.product.service.dto.NarrativeResult;
-import hackathon.kb.chakchak.global.s3.service.S3StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,13 +23,11 @@ public class ProductNarrativeService {
     private final SellerRepository sellerRepository;
     private final InstaPromptRepository instaPromptRepository;
     private final ProductRepository productRepository;
-    private final ImageRepository imageRepository;
 
     private final OpenAIMultimodalNarrativeService openAIMultimodalNarrativeService;
-    private final S3StorageService s3StorageService;
 
     @Transactional(readOnly = false)
-    public NarrativeResult createNarrative(Long memberId, ProductMetaRequest meta, List<MultipartFile> images) {
+    public NarrativeResult createNarrative(Long memberId, ProductMetaRequest meta) {
         // 0) seller
         Seller seller = sellerRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalStateException("Seller 정보가 없습니다."));
@@ -59,21 +51,8 @@ public class ProductNarrativeService {
 
         product = productRepository.save(product);
 
-        // 2) 이미지 URL들 ProductImage로 저장
-        List<String> imageUrls = s3StorageService
-                .uploadImages(images, "products")
-                .stream()
-                .map(URL::toString)
-                .toList();
-
-        List<Image> imgs = new ArrayList<>();
-        for (int i = 0; i < imageUrls.size(); i++) {
-            imgs.add(Image.builder()
-                    .product(product)
-                    .url(imageUrls.get(i))
-                    .build());
-        }
-        imageRepository.saveAll(imgs);
+        // 2) 이미지 URL
+        List<String> imageUrls = meta.getImages();
 
         // 3) 카테고리 프롬프트 조회
         InstaPrompt prompt = instaPromptRepository
@@ -134,7 +113,7 @@ public class ProductNarrativeService {
 
         // 6) GPT 호출
         return openAIMultimodalNarrativeService.generateNarrativeWithImageUrls(
-                product.getId(), systemInstruction, userText, imageUrls
+                systemInstruction, userText, imageUrls
         );
     }
 }

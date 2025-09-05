@@ -1,9 +1,8 @@
 package hackathon.kb.chakchak.global.response;
 
-import org.springframework.http.HttpStatus;
-
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Builder
@@ -19,6 +18,7 @@ public class BaseResponse<T> {
 		return BaseResponse
 			.<T>builder()
 			.code(code.getCode())
+				.status(code.getStatus())
 			.message(code.getMessage())
 			.data(data)
 			.build();
@@ -30,6 +30,7 @@ public class BaseResponse<T> {
 		return BaseResponse
 			.<T>builder()
 			.code(code.getCode())
+				.status(code.getStatus())
 			.message(code.getMessage())
 			.build();
 	}
@@ -39,6 +40,7 @@ public class BaseResponse<T> {
 		return BaseResponse
 			.<T>builder()
 			.code(code.getCode())
+				.status(code.getStatus())
 			.message(code.getMessage())
 			.data(data)
 			.build();

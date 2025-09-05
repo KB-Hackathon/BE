@@ -3,7 +3,6 @@ package hackathon.kb.chakchak.domain.member.domain.entity;
 import java.util.List;
 
 import hackathon.kb.chakchak.domain.order.domain.entity.Order;
-import hackathon.kb.chakchak.domain.review.domain.entity.Review;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,9 +20,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class Buyer extends Member {
-
-	@OneToMany(mappedBy = "reviewer", fetch = FetchType.LAZY)
-	List<Review> reviews;
 
 	@OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
 	List<Order> orders;

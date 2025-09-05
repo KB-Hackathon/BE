@@ -11,6 +11,7 @@ import hackathon.kb.chakchak.domain.product.service.ProductCommandService;
 import hackathon.kb.chakchak.domain.product.service.ProductNarrativeService;
 import hackathon.kb.chakchak.domain.product.service.dto.NarrativeResult;
 
+import hackathon.kb.chakchak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -45,14 +46,13 @@ public class ProductController {
     private final ProductBasicService productBasicService;
 
     @Operation(summary = "gpt 문구 받아오기", description = "상품 정보를 토대로 gpt 피드 문구 및 태그를 받아옵니다.")
-    @PostMapping(value = "/narrative", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<NarrativeResult> makeNarrative(
-            @RequestPart("meta") ProductMetaRequest meta,
-            @RequestPart("images") List<MultipartFile> images,
+    @PostMapping("/narrative")
+    public BaseResponse<NarrativeResult> makeNarrative(
+            @RequestBody ProductMetaRequest meta,
             @AuthenticationPrincipal MemberPrincipal principal
     ) {
-        return ResponseEntity.ok(
-                productNarrativeService.createNarrative(principal.getId(), meta, images));
+        return BaseResponse.OK(
+                productNarrativeService.createNarrative(principal.getId(), meta));
     }
 
     @Operation(summary = "카테고리별 조회", description = "카테고리별 상품을 조회합니다. 10개를 반환하도록 하였습니다.")
@@ -71,16 +71,9 @@ public class ProductController {
 
     @Operation(summary = "상품 등록", description = "상품 정보를 최종 등록합니다.")
     @PostMapping("/save")
-    public ResponseEntity<Void> saveProduct(@RequestBody ProductSaveRequest req) {
-        Long productId = productCommandService.saveProduct(req);
-        return ResponseEntity.ok().build();
-    }
-
-    // 임시용
-    @Data
-    public static class NarrativeRequest {
-        private String systemInstruction;
-        private String userText;
-        private List<String> imageUrls;
+    public BaseResponse<ProductSaveResponse> saveProduct(
+            @RequestBody ProductSaveRequest req,
+            @AuthenticationPrincipal MemberPrincipal principal) {
+        return BaseResponse.OK(productCommandService.saveProduct(principal.getId(), req));
     }
 }

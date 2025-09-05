@@ -1,4 +1,4 @@
-package hackathon.kb.chakchak.domain.member.api.dto;
+package hackathon.kb.chakchak.domain.member.api.dto.res;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import io.swagger.v3.oas.annotations.media.Schema;
