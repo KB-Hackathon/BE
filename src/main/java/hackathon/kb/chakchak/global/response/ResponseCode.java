@@ -19,10 +19,12 @@ public enum ResponseCode {
 	S3_UPLOAD_FAIL("GEN-006", HttpStatus.INTERNAL_SERVER_ERROR, "S3 이미지 업로드 실패"),
 	S3_NOT_FOUND("GEN-007", HttpStatus.INTERNAL_SERVER_ERROR, "이름 기반 S3 이미지 조회 실패"),
 
-	// OAUTH
-	SIGNUP_TOKEN_INVALID("OAUTH-001", HttpStatus.BAD_REQUEST, "Invalid signup token"),
-	SIGNUP_TOKEN_EXPIRED("OAUTH-002", HttpStatus.UNAUTHORIZED, "Signup token expired"),
-	SIGNUP_NOT_REQUIRED("OAUTH-003", HttpStatus.CONFLICT, "Signup not required"),
+	// AUTH
+	TOKEN_INVALID("AUTH-001", HttpStatus.BAD_REQUEST, "Invalid token"),
+	TOKEN_EXPIRED("AUTH-002", HttpStatus.UNAUTHORIZED, "Token expired"),
+	SIGNUP_NOT_REQUIRED("AUTH-003", HttpStatus.CONFLICT, "Signup not required"),
+	TOKEN_MISSING ("AUTH-004", HttpStatus.UNAUTHORIZED, "Token missing"),
+	REFRESH_REPLAY ("AUTH-005", HttpStatus.UNAUTHORIZED, "Refresh token replayed"),
 
 	//MEMBER
 	MEMBER_NOT_FOUND("MEM-001", HttpStatus.NOT_FOUND, "Member not found"),
