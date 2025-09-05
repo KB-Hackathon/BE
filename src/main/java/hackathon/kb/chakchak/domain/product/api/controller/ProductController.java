@@ -3,6 +3,7 @@ package hackathon.kb.chakchak.domain.product.api.controller;
 import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductMetaRequest;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveRequest;
+import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveResponse;
 import hackathon.kb.chakchak.domain.product.domain.dto.ProductReadResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import hackathon.kb.chakchak.domain.product.service.OpenAIMultimodalNarrativeService;
@@ -10,28 +11,12 @@ import hackathon.kb.chakchak.domain.product.service.ProductBasicService;
 import hackathon.kb.chakchak.domain.product.service.ProductCommandService;
 import hackathon.kb.chakchak.domain.product.service.ProductNarrativeService;
 import hackathon.kb.chakchak.domain.product.service.dto.NarrativeResult;
-
 import hackathon.kb.chakchak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import java.util.List;
-
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
