@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/oauth")
 @RequiredArgsConstructor
-@Slf4j
+@Tag(name = "회원 관리 API", description = "회원 관리 API")
 public class OauthController {
 
     private final CookieIssuer refreshCookieSupport;
@@ -55,6 +55,7 @@ public class OauthController {
                 ));
     }
 
+    @Operation(summary = "서비스 탈퇴", description = "서비스 탈퇴를 진행합니다.")
     @DeleteMapping("/member")
     public ResponseEntity<?> withdraw(
             @AuthenticationPrincipal MemberPrincipal principal,
