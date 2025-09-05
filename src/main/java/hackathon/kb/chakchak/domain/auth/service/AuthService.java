@@ -41,19 +41,14 @@ public class AuthService {
     private final MemberService memberService;
     private final KakaoApiClient kakaoApiClient;
 
-    public ResponseEntity<?> withdraw(MemberPrincipal principal,
+    public void withdraw(MemberPrincipal principal,
                                       String authorization,
                                       HttpServletRequest request) {
-        if (principal == null) {
-            return ResponseEntity.status(401).build();
-        }
+        if (principal == null) throw new BusinessException(ResponseCode.UNAUTHORIZED);
 
         Long memberId = principal.getId();
-
         Member member = memberRepository.findById(memberId).orElse(null);
-        if (member == null) {
-            return ResponseEntity.status(401).body(Map.of("msg", "USER_NOT_FOUND"));
-        }
+        if (member == null) throw new BusinessException(ResponseCode.UNAUTHORIZED);
 
         // 카카오 Unlink (Admin 키)
         try {
@@ -90,13 +85,8 @@ public class AuthService {
                         (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000L);
                 int minutes = (int) Math.max(1L, (secLeft + 59) / 60);
                 redisUtil.setBlackList(refresh, "refreshToken", minutes);
-            } catch (JwtException ignore) { /* 이미 무효여도 무시 */ }
+            } catch (JwtException ignore) { }
         }
-        ResponseCookie deleteCookie = cookieIssuer.delete(); // Max-Age=0 등
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
-                .body(Map.of("status", "OK"));
     }
 
     @Transactional
@@ -138,7 +128,7 @@ public class AuthService {
         String access = jwtIssuer.createAccessToken(saved.getId(), saved.getRole().name());
         String refresh = jwtIssuer.createRefreshToken(saved.getId());
 
-        return new SignupTokens(true, access, refresh);
+        return new SignupTokens(access, refresh);
     }
 
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
