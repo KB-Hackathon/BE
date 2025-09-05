@@ -4,6 +4,7 @@ import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class ProductSaveRequest {
     private List<String> tags;
 
     @Schema(description = "상품 가격", example = "4800")
-    private Long price;
+    private BigDecimal price;
 
     @Schema(description = "쿠폰 사용 가능 여부", example = "true")
     private Boolean isCoupon;
