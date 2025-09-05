@@ -49,7 +49,7 @@ public class ProductController {
 
     @Operation(summary = "상품 아이디 기반 조회", description = "상품 아이디를 기반으로 한 개 상품의 정보를 조회합니다.")
     @GetMapping("/{productId}")
-    public BaseResponse<ProductReadResponseDto> listByCategory(@PathVariable(name = "productId") Long productId){
+    public BaseResponse<ProductReadResponseDto> listByProductId(@PathVariable(name = "productId") Long productId){
         return BaseResponse.OK(productBasicService.getProductById(productId));
     }
 
