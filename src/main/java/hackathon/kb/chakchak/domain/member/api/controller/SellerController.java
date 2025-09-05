@@ -5,6 +5,7 @@ import hackathon.kb.chakchak.domain.member.api.dto.BizRegisterRequest;
 import hackathon.kb.chakchak.domain.member.api.dto.BizRegisterResponse;
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.member.service.SellerService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/api/sellers")
 @RequiredArgsConstructor
+@Tag(name = "사업자 등록 API", description = "에이픽 API와 주소 API 호출 후 사업자 등록 번호 확인 및 행정동 코드 추출 API")
 public class SellerController {
     private final SellerService sellerService;
 
