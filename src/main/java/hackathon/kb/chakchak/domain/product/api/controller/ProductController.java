@@ -36,22 +36,21 @@ public class ProductController {
             @RequestBody ProductMetaRequest meta,
             @AuthenticationPrincipal MemberPrincipal principal
     ) {
-        return BaseResponse.OK(
-                productNarrativeService.createNarrative(principal.getId(), meta));
+        return BaseResponse.OK(productNarrativeService.createNarrative(principal.getId(), meta));
     }
 
     @Operation(summary = "카테고리별 조회", description = "카테고리별 상품을 조회합니다. 10개를 반환하도록 하였습니다.")
     @GetMapping("/category/{category}")
-    public List<ProductReadResponseDto> listByCategory(
+    public BaseResponse<List<ProductReadResponseDto>> listByCategory(
         @PathVariable Category category,
         @RequestParam(defaultValue = "0") int page) {
-        return productBasicService.getProductsByCategory(category, page);
+        return BaseResponse.OK(productBasicService.getProductsByCategory(category, page));
     }
 
     @Operation(summary = "상품 아이디 기반 조회", description = "상품 아이디를 기반으로 한 개 상품의 정보를 조회합니다.")
     @GetMapping("/{productId}")
-    public ProductReadResponseDto listByCategory(@PathVariable(name = "productId") Long productId){
-        return productBasicService.getProductById(productId);
+    public BaseResponse<ProductReadResponseDto> listByCategory(@PathVariable(name = "productId") Long productId){
+        return BaseResponse.OK(productBasicService.getProductById(productId));
     }
 
     @Operation(summary = "상품 등록", description = "상품 정보를 최종 등록합니다.")
