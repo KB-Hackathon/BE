@@ -1,19 +1,16 @@
 package hackathon.kb.chakchak.domain.order.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import hackathon.kb.chakchak.domain.order.domain.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import hackathon.kb.chakchak.domain.member.domain.entity.Member;
-import hackathon.kb.chakchak.domain.order.domain.entity.Order;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
 	Optional<Order> findById(Long id);
 
-	List<Order> findByMember(Member member);
-
+	List<Order> findByBuyer_Id(Long buyerId);
 }
