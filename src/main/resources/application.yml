@@ -98,3 +98,6 @@ kakao:
 juso:
   base-url: ${JUSO_ADMCD_BASE_URL}
   api-key: ${JUSO_ADMCD_API_KEY}
+
+base:
+  url: ${BASE_URL}
