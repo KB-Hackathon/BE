@@ -5,6 +5,7 @@ import hackathon.kb.chakchak.domain.product.api.dto.ProductMetaRequest;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveRequest;
 import hackathon.kb.chakchak.domain.product.domain.dto.ProductReadResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
+import hackathon.kb.chakchak.domain.product.service.OpenAIMultimodalNarrativeService;
 import hackathon.kb.chakchak.domain.product.service.ProductBasicService;
 import hackathon.kb.chakchak.domain.product.service.ProductCommandService;
 import hackathon.kb.chakchak.domain.product.service.ProductNarrativeService;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
@@ -34,18 +36,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/product")
-@Tag(name = "상품 조회 API", description = "상품 조회용 API")
-public class ProductController {
-  
-    private final OpenAIMultimodalNarrativeService narrativeService;
-    private final ProductBasicService productBasicService;
-  
 @RequestMapping("/api/products")
-@Tag(name = "상품 API", description = "gpt 기반 문구 생성 / 상품 등록용 API")
+@Tag(name = "상품 관련 API", description = "gpt 기반 문구 생성 / 상품 등록용 API")
 public class ProductController {
     private final ProductNarrativeService productNarrativeService;
     private final ProductCommandService productCommandService;
+    private final OpenAIMultimodalNarrativeService narrativeService;
+    private final ProductBasicService productBasicService;
 
     @Operation(summary = "gpt 문구 받아오기", description = "상품 정보를 토대로 gpt 피드 문구 및 태그를 받아옵니다.")
     @PostMapping(value = "/narrative", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -72,16 +69,18 @@ public class ProductController {
         return productBasicService.getProductById(productId);
     }
 
+    @Operation(summary = "상품 등록", description = "상품 정보를 최종 등록합니다.")
+    @PostMapping("/save")
+    public ResponseEntity<Void> saveProduct(@RequestBody ProductSaveRequest req) {
+        Long productId = productCommandService.saveProduct(req);
+        return ResponseEntity.ok().build();
+    }
+
     // 임시용
     @Data
     public static class NarrativeRequest {
         private String systemInstruction;
         private String userText;
         private List<String> imageUrls;
-    @Operation(summary = "상품 등록", description = "상품 정보를 최종 등록합니다.")
-    @PostMapping("/save")
-    public ResponseEntity<Void> saveProduct(@RequestBody ProductSaveRequest req) {
-        Long productId = productCommandService.saveProduct(req);
-        return ResponseEntity.ok().build();
     }
 }
