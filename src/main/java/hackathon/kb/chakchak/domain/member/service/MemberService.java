@@ -21,4 +21,13 @@ public class MemberService {
 
         return MemberProfileResponse.from(m);
     }
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Member m = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+
+        // soft delete
+        m.setIsDeleted(true);
+    }
 }

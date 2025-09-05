@@ -2,7 +2,7 @@ package hackathon.kb.chakchak.domain.jwt.filter;
 
 import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.jwt.util.JwtIssuer;
-import hackathon.kb.chakchak.domain.jwt.util.CookieIssuer;
+import hackathon.kb.chakchak.global.redis.util.RedisUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -11,7 +11,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,117 +32,101 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtIssuer jwtIssuer;
+    private final RedisUtil redisUtil;
 
-    private static final String ATTR_ACCESS_ERR   = "JWT_ACCESS_ERROR_CODE";
-    private static final String ATTR_ACCESS_ERR_MSG = "JWT_ACCESS_ERROR_MSG";
-    private static final String ATTR_REFRESH_ERR  = "JWT_REFRESH_ERROR_CODE";
-    private static final String ATTR_REFRESH_ERR_MSG = "JWT_REFRESH_ERROR_MSG";
-    private static final String ATTR_SUB  = "JWT_SUBJECT";    // memberId
-    private static final String ATTR_ROLE = "JWT_ROLE";       // role(선택)
+    private static final String ACCESS_ERR  = "JWT_ACCESS_ERROR_CODE";
+    private static final String ACCESS_ERR_MSG = "JWT_ACCESS_ERROR_MSG";
+
+    private static final String[] WHITELIST = {
+            "/", "/index.html", "/favicon.ico", "/health/", "/health/**",
+            "/api/oauth/**", "/login/**", "/oauth2/**", "/oauth2/authorization/kakao/**", "/api/oauth/signup/additional",
+            "/api/auth/**", "/api/auth/signup", "/api/auth/refresh",
+            // Swagger
+            "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**"
+    };
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
+        return PatternMatchUtils.simpleMatch(WHITELIST, uri);
+    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 
         String accessToken = parseBearerToken(req);
-        log.info("검증할 access token 값 입니다: {}", accessToken);
 
-        if (accessToken != null) {
-            try {
-                Claims claims = jwtIssuer.parseJws(accessToken).getBody();
-                log.info("access token을 통해 검증한 사용자의 값입니다: {}", claims);
-
-                if ("access".equals(claims.get("typ", String.class))) {
-                    Long memberId = Long.valueOf(claims.getSubject());
-                    String role = claims.get("role", String.class);
-                    log.info("추출한 memberId: {}, role: {}", memberId, role);
-
-                    MemberPrincipal principal = new MemberPrincipal(memberId, role);
-                    log.info("principal: {}", principal);
-
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))); // AuthorityUtils.NO_AUTHORITIES
-
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    markError(req, true, JwtErrorCode.INVALID, "Not an access token (typ mismatch)");
-                }
-
-            } catch (ExpiredJwtException e) {
-                log.debug("ACCESS expired", e);
-                markError(req, true, JwtErrorCode.EXPIRED, e.getMessage());
-                SecurityContextHolder.clearContext();
-            } catch (MalformedJwtException e) {
-                log.debug("ACCESS malformed", e);
-                markError(req, true, JwtErrorCode.MALFORMED, e.getMessage());
-                SecurityContextHolder.clearContext();
-            } catch (SignatureException e) {
-                log.debug("ACCESS bad signature", e);
-                markError(req, true, JwtErrorCode.INVALID_SIGNATURE, e.getMessage());
-                SecurityContextHolder.clearContext();
-            } catch (UnsupportedJwtException e) {
-                log.debug("ACCESS unsupported", e);
-                markError(req, true, JwtErrorCode.UNSUPPORTED, e.getMessage());
-                SecurityContextHolder.clearContext();
-            } catch (IllegalArgumentException e) {
-                log.debug("ACCESS illegal arg", e);
-                markError(req, true, JwtErrorCode.ILLEGAL_ARGUMENT, e.getMessage());
-                SecurityContextHolder.clearContext();
-            } catch (JwtException e) {
-                log.debug("ACCESS invalid", e);
-                markError(req, true, JwtErrorCode.INVALID, e.getMessage());
-                SecurityContextHolder.clearContext();
-            }
+        // 토큰 없으면 바로 다음 필터로
+        if (!StringUtils.hasText(accessToken)) {
+            chain.doFilter(req, res);
+            return;
         }
 
-        String refreshToken = extractRefreshCookie(req);
-        if (refreshToken != null) {
-            try {
-                Claims claims = jwtIssuer.parseJws(refreshToken).getBody();
+        log.info("검증할 access token 값: {}", accessToken);
 
-                if (!"refresh".equals(claims.get("typ", String.class))) {
-                    markError(req, false, JwtErrorCode.INVALID, "Not a refresh token (typ mismatch)");
-                } else {
-                    // 컨트롤러(/auth/refresh)에서 쓰라고 속성에 심어둠
-                    req.setAttribute(ATTR_SUB, claims.getSubject());
-                    req.setAttribute(ATTR_ROLE, claims.get("role", String.class)); // 없을 수도
-                }
-            } catch (ExpiredJwtException e) {
-                log.debug("REFRESH expired", e);
-                markError(req, false, JwtErrorCode.EXPIRED, e.getMessage());
-            } catch (MalformedJwtException e) {
-                log.debug("REFRESH malformed", e);
-                markError(req, false, JwtErrorCode.MALFORMED, e.getMessage());
-            } catch (SignatureException e) {
-                log.debug("REFRESH bad signature", e);
-                markError(req, false, JwtErrorCode.INVALID_SIGNATURE, e.getMessage());
-            } catch (UnsupportedJwtException e) {
-                log.debug("REFRESH unsupported", e);
-                markError(req, false, JwtErrorCode.UNSUPPORTED, e.getMessage());
-            } catch (IllegalArgumentException e) {
-                log.debug("REFRESH illegal arg", e);
-                markError(req, false, JwtErrorCode.ILLEGAL_ARGUMENT, e.getMessage());
-            } catch (JwtException e) {
-                log.debug("REFRESH invalid", e);
-                markError(req, false, JwtErrorCode.INVALID, e.getMessage());
-            }
+        // 블랙리스트(로그아웃) 방어
+        if (redisUtil.hasKeyBlackList(accessToken)) {
+            // 전역 예외 처리기가 있다면 예외 던지기
+            // throw new CustomException("로그아웃된 사용자 입니다.");
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.setContentType("application/json;charset=UTF-8");
+            res.getWriter().write("{\"code\":\"LOGGED_OUT\"}");
+            return;
         }
+
+        try {
+            Claims claims = jwtIssuer.parseJws(accessToken).getBody();
+            log.info("access token을 통해 검증한 사용자의 값입니다: {}", claims);
+
+            if ("access".equals(claims.get("typ", String.class))) {
+                Long memberId = Long.valueOf(claims.getSubject());
+                String role = claims.get("role", String.class);
+                log.info("추출한 memberId: {}, role: {}", memberId, role);
+
+                MemberPrincipal principal = new MemberPrincipal(memberId, role);
+                log.info("principal: {}", principal);
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))); // AuthorityUtils.NO_AUTHORITIES
+
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                markError(req,  JwtErrorCode.INVALID, "Not an access token (typ mismatch)");
+                SecurityContextHolder.clearContext();
+            }
+
+        } catch (ExpiredJwtException e) {
+            log.debug("ACCESS expired", e);
+            markError(req, JwtErrorCode.EXPIRED, e.getMessage());
+            SecurityContextHolder.clearContext();
+        } catch (MalformedJwtException e) {
+            log.debug("ACCESS malformed", e);
+            markError(req, JwtErrorCode.MALFORMED, e.getMessage());
+            SecurityContextHolder.clearContext();
+        } catch (SignatureException e) {
+            log.debug("ACCESS bad signature", e);
+            markError(req,JwtErrorCode.INVALID_SIGNATURE, e.getMessage());
+            SecurityContextHolder.clearContext();
+        } catch (UnsupportedJwtException e) {
+            log.debug("ACCESS unsupported", e);
+            markError(req, JwtErrorCode.UNSUPPORTED, e.getMessage());
+            SecurityContextHolder.clearContext();
+        } catch (IllegalArgumentException e) {
+            log.debug("ACCESS illegal arg", e);
+            markError(req, JwtErrorCode.ILLEGAL_ARGUMENT, e.getMessage());
+            SecurityContextHolder.clearContext();
+        } catch (JwtException e) {
+            log.debug("ACCESS invalid", e);
+            markError(req, JwtErrorCode.INVALID, e.getMessage());
+            SecurityContextHolder.clearContext();
+        }
+
         chain.doFilter(req, res);
-    }
-
-    private String extractRefreshCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        log.info("cookies: {}", cookies);
-
-        if (cookies == null) return null;
-        for (Cookie c : cookies) {
-            if (CookieIssuer.REFRESH_TOKEN.equals(c.getName())) {
-                return c.getValue();
-            }
-        }
-        return null;
     }
 
     private String parseBearerToken(HttpServletRequest request) {
@@ -157,14 +141,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authorization.substring(7); // return token
     }
 
-    private void markError(HttpServletRequest req, boolean accessToken, JwtErrorCode code, String msg) {
-        if (accessToken) {
-            req.setAttribute(ATTR_ACCESS_ERR, code);
-            if (msg != null) req.setAttribute(ATTR_ACCESS_ERR_MSG, msg);
-        } else {
-            req.setAttribute(ATTR_REFRESH_ERR, code);
-            if (msg != null) req.setAttribute(ATTR_REFRESH_ERR_MSG, msg);
-        }
+    private void markError(HttpServletRequest req, JwtErrorCode code, String msg) {
+        req.setAttribute(ACCESS_ERR, code);
+        if (msg != null) req.setAttribute(ACCESS_ERR_MSG, msg);
     }
 }
 

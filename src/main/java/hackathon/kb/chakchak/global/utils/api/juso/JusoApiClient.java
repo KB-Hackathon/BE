@@ -13,10 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JusoApiClient {
 
-	@Value("${JUSO_ADMCD_BASE_URL}")
+	@Value("${juso.base-url}")
 	private String baseUrl;
 
-	@Value("${JUSO_ADMCD_API_KEY}")
+	@Value("${juso.api-key}")
 	private String apiKey;
 
 	// 간단 사용용 RestClient

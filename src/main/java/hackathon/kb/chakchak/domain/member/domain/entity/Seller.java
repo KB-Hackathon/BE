@@ -60,5 +60,5 @@ public class Seller extends Member {
 	private String accountNumber; 			// (seller) 판매자 계좌 번호
 
 	@Column(length = 10)
-	private String admCd;
+	private String admCd;					// (seller) 행정동 코드
 }

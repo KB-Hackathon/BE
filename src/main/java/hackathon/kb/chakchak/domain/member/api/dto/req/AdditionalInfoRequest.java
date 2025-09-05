@@ -1,5 +1,6 @@
 package hackathon.kb.chakchak.domain.member.api.dto.req;
 
+import hackathon.kb.chakchak.domain.member.domain.enums.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -16,6 +17,9 @@ public class AdditionalInfoRequest {
 
     @NotNull
     private Short age; // 나이 (필수)
+
+    @NotNull(message = "gender는 필수입니다. [MALE, FEMALE] 중 하나")
+    private Gender gender; // 성별 (필수)
 
     @NotBlank
     private String address; // 도로명 주소 (필수)

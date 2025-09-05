@@ -33,6 +33,12 @@ spring:
     base_url: ${APICK_BASE_URL}
     auth_key: ${APICK_AUTH_KEY}
 
+  openai:
+    api:
+      key: ${OPENAI_API_KEY}
+      url: ${OPENAI_API_URL}
+      model: ${OPENAI_API_MODEL}
+
   security:
     oauth2:
       client:
@@ -51,11 +57,11 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-  openai:
-    api:
-      key: ${OPENAI_API_KEY}
-      url: ${OPENAI_API_URL}
-      model: ${OPENAI_API_MODEL}
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    ssl:
+      enabled: ${SSL_ENABLED}
 
 jwt:
   secret: ${JWT_SECRET}
@@ -85,3 +91,10 @@ cloud:
       bucket: ${BUCKET_NAME}
     region:
       static: ${REGION}
+
+kakao:
+  admin-key: ${ADMIN}
+
+juso:
+  base-url: ${JUSO_ADMCD_BASE_URL}
+  api-key: ${JUSO_ADMCD_API_KEY}
