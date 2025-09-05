@@ -32,4 +32,7 @@ public class AdditionalInfoRequest {
 
     @Schema(description = "전화번호", example = "01011112222")
     private String phoneNumber; // 전화번호 (선택)
+
+    @Schema(description = "프로필 이미지", example = "s3 URL")
+    private String image; // 프로필 이미지 (선택)
 }
