@@ -5,6 +5,7 @@ import hackathon.kb.chakchak.domain.member.api.dto.req.BizRegisterRequest;
 import hackathon.kb.chakchak.domain.member.api.dto.res.BizRegisterResponse;
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.member.service.SellerService;
+import hackathon.kb.chakchak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,11 @@ public class SellerController {
     private final SellerService sellerService;
 
     @PostMapping("/register")
-    public ResponseEntity<BizRegisterResponse> register(
+    public BaseResponse<BizRegisterResponse> register(
             @Valid @RequestBody BizRegisterRequest req,
             @AuthenticationPrincipal MemberPrincipal principal
     ) {
         Seller saved = sellerService.updateSellerFromApick(req.getBizNo(), principal.getId());
-        return ResponseEntity.ok(BizRegisterResponse.from(saved));
+        return BaseResponse.OK(BizRegisterResponse.from(saved));
     }
 }
