@@ -1,7 +1,5 @@
 package hackathon.kb.chakchak.domain.order.domain.entity;
 
-import java.util.List;
-
 import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
 import hackathon.kb.chakchak.domain.order.domain.enums.OrderStatus;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
@@ -16,7 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -45,8 +43,8 @@ public class Order extends BaseEntity {
 	@JoinColumn(name = "product_id")
 	private Product product;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	private List<Coupon> coupons;
+	@OneToOne(mappedBy = "coupon", fetch = FetchType.LAZY)
+	private Coupon coupon;
 
 	@Column(nullable = false)
 	private Short quantity;
