@@ -1,12 +1,11 @@
 package hackathon.kb.chakchak.domain.product.domain.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 public record ProductReadResponseDto(
@@ -26,6 +25,8 @@ public record ProductReadResponseDto(
 	Long price,
 	@Schema(description = "상품 설명", example = "이쁜 옷")
 	String description,
+	@Schema(description = "쿠폰 사용 가능 여부", example = "true")
+	Boolean isCoupon,
 	@Schema(description = "목표 모집 회원 수", example = "30")
 	Short targetAmount,
 	@Schema(description = "모집 시작 기간", example = "2025-09-01T10:00:00")
