@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/oauth/signup/additional").permitAll() // 회원가입 시 추가 정보
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jsonAuthenticationEntryPoint) // 401
