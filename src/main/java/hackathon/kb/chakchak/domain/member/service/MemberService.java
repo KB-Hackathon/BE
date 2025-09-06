@@ -19,7 +19,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberProfileResponse getMyProfile(Long memberId) {
         Member m = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
 
         return MemberProfileResponse.from(m);
     }
