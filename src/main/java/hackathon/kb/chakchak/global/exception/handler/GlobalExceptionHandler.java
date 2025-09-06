@@ -54,4 +54,18 @@ public class GlobalExceptionHandler {
 				.status(rc.getStatus())
 				.body(BaseResponse.ERROR(rc, message));
 	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<String> handleOtherErrorException(Exception e, HttpServletRequest request) {
+		kafkaProducer.sendToLogTopic(LogMessageMapper.buildLogMessage(
+			LogLevel.ERROR,
+			null,
+			"예측하지 못한 에러",
+			Common.builder().srcIp(request.getRemoteAddr()).apiMethod(request.getMethod())
+				.callApiPath(request.getRequestURI()).deviceInfo(request.getHeader("user-agent"))
+				.retryCount(0).build(),
+			e.getMessage()
+		));
+		return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+	}
 }
