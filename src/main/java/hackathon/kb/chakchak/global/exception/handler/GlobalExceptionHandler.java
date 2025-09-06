@@ -66,6 +66,6 @@ public class GlobalExceptionHandler {
 				.retryCount(0).build(),
 			e.getMessage()
 		));
-		return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+		return ResponseEntity.status(ResponseCode.BAD_REQUEST.getStatus()).body(e.getMessage());
 	}
 }
