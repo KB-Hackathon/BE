@@ -26,11 +26,14 @@ public enum ResponseCode {
 	TOKEN_MISSING ("AUTH-004", HttpStatus.UNAUTHORIZED, "Token missing"),
 	REFRESH_REPLAY ("AUTH-005", HttpStatus.UNAUTHORIZED, "Refresh token replayed"),
 
-	//MEMBER
+	// MEMBER
 	MEMBER_NOT_FOUND("MEM-001", HttpStatus.NOT_FOUND, "Member not found"),
 
 	// COUPON
 	COUPON_NOT_FOUND("CPN-001", HttpStatus.NOT_FOUND, "Coupon not found"),
+
+	// REPORT
+	REPORT_NOT_FOUND("RPT-001", HttpStatus.NOT_FOUND, "Report not found"),
 	;
 
 	private final String code;

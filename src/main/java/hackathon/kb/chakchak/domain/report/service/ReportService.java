@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import hackathon.kb.chakchak.domain.report.api.dto.ReportResponseDto;
 import hackathon.kb.chakchak.domain.report.domain.entity.Report;
 import hackathon.kb.chakchak.domain.report.repository.ReportRepository;
+import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.BaseResponse;
+import hackathon.kb.chakchak.global.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,7 +22,7 @@ public class ReportService {
 
 	public BaseResponse<ReportResponseDto> getReportBySellerId(Long sellerId) {
 		Report report = reportRepository.findBySellerId(sellerId)
-			.orElseThrow(() -> new IllegalArgumentException("리포트가 존재하지 않습니다."));
+			.orElseThrow(() -> new BusinessException(ResponseCode.REPORT_NOT_FOUND));
 
 		// 1. 성공률 계산
 		int successRate = calcSuccessRate(report.getSuccessCnt(), report.getFailedCnt());
