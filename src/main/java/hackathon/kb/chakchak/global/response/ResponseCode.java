@@ -28,6 +28,7 @@ public enum ResponseCode {
 	//MEMBER
 	MEMBER_NOT_FOUND("MEM-001", HttpStatus.NOT_FOUND, "Member not found"),
 	SELLER_NOT_FOUND("SELLER-001", HttpStatus.NOT_FOUND, "Seller not found"),
+	BUYER_NOT_FOUND("BUYER-001", HttpStatus.NOT_FOUND, "Buyer not found"),
 
 	// COUPON
 	COUPON_NOT_FOUND("CPN-001", HttpStatus.NOT_FOUND, "Coupon not found"),

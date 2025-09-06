@@ -3,6 +3,7 @@ package hackathon.kb.chakchak.domain.product.util;
 import hackathon.kb.chakchak.domain.member.api.dto.res.SellerReadResponseDto;
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import hackathon.kb.chakchak.domain.order.domain.entity.Order;
+import hackathon.kb.chakchak.domain.product.api.dto.ProductProgressResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.dto.*;
 import hackathon.kb.chakchak.domain.product.domain.entity.Image;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
@@ -36,6 +37,7 @@ public class ProductToDtoMapper {
 				.targetAmount(product.getTargetAmount())
 				.presentPersonCount(presentPersonCount)
 				.totalPrice(getTotalPrice(presentPersonCount, product.getPrice()))
+				.isCoupon(product.isCoupon()) // ← 추가 추천
 				.build();
 	}
 
@@ -81,5 +83,21 @@ public class ProductToDtoMapper {
 
 	private static BigDecimal getTotalPrice(Short presentPersonCount, BigDecimal price) {
 		return price.multiply(new BigDecimal(presentPersonCount));
+	}
+
+	public static ProductPreviewResponseDto productToProductPreviewResponseDto(Product product, ProductProgressResponseDto progress) {
+		return ProductPreviewResponseDto.builder()
+				.productId(product.getId())
+				.title(product.getTitle())
+				.images(ImageToImageReadResponseDto(product.getImages()))
+				.category(product.getCategory())
+				.status(product.getStatus())
+				.targetAmount(product.getTargetAmount())
+				.recruitmentEndPeriod(product.getRecruitmentEndPeriod())
+				.productProgressResponseDto(progress != null
+						? progress
+						: new ProductProgressResponseDto(product.getId(), 0L, 0) // 기본값
+				)
+				.build();
 	}
 }

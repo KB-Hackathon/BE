@@ -33,4 +33,11 @@ public class BuyerController {
     public BaseResponse<BuyerOrderListResponse> getOrderList(@PathVariable(name = "buyerId") Long buyerId) {
         return BaseResponse.OK(buyerService.getOrderList(buyerId));
     }
+
+    @Operation(summary = "구매자 공구 조회", description = "구매자 아이디로 공동구매 리스트를 조회합니다.")
+    @GetMapping("/2/{buyerId}")
+    public BaseResponse<BuyerOrderListResponse> listOrdersByBuyer(@PathVariable Long buyerId) {
+        return BaseResponse.OK(buyerService.getBuyerOrders(buyerId));
+    }
+
 }

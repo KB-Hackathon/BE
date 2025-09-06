@@ -1,9 +1,9 @@
 package hackathon.kb.chakchak.domain.product.domain.dto;
 
+import hackathon.kb.chakchak.domain.product.api.dto.ProductProgressResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
@@ -22,11 +22,9 @@ public record ProductPreviewResponseDto(
         ProductStatus status,
         @Schema(description = "목표 모집 회원 수", example = "30")
         Short targetAmount,
-        @Schema(description = "참여중인 인원", example = "22")
-        Short presentPersonCount,
-        @Schema(description = "현재 달성 액수", example = "34200000")
-        BigDecimal totalPrice,
         @Schema(description = "모집 종료 기간", example = "2025-09-01T10:00:00")
-        LocalDateTime recruitmentEndPeriod
+        LocalDateTime recruitmentEndPeriod,
+        @Schema(description = "참여 인원 + 달성률")
+        ProductProgressResponseDto productProgressResponseDto
 ) {
 }

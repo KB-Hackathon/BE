@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-public record OrderItemResponseDto(
+public record OrderResponseDto(
         @Schema(description = "주문 아이디", example = "10")
         Long orderId,
         @Schema(description = "주문 수량", example = "1")
@@ -18,5 +18,5 @@ public record OrderItemResponseDto(
         @Schema(description = "주문 상태", example = "PAY_COMPLETE")
         OrderStatus orderStatus,
         @Schema(description = "상품 요약 정보")
-        ProductPreviewResponseDto product
+        ProductPreviewResponseDto productPreview
 ) {}
