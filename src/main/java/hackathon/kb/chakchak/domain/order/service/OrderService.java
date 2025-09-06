@@ -59,4 +59,14 @@ public class OrderService {
 
 		return new CouponOrderRes(coupon.getUuid(), coupon.getExpiration());
 	}
+
+	@Transactional
+	public void terminateCoupon(Long productId) {
+		Product product = productRepository.findById(productId)
+			.orElseThrow(() -> new BusinessException(ResponseCode.BAD_REQUEST));
+
+		for (Order order : product.getOrders()) {
+			order.getCoupon().activeCoupon();
+		}
+	}
 }

@@ -40,7 +40,13 @@ public class Coupon {
 
 	private Boolean isUsed = false;
 
+	private Boolean isActivate = false;
+
 	public void useCoupon() {
 		this.isUsed = true;
+	}
+
+	public void activeCoupon() {
+		this.isActivate = true;
 	}
 }
