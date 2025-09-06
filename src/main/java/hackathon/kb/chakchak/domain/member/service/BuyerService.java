@@ -10,7 +10,6 @@ import hackathon.kb.chakchak.domain.order.repository.OrderRepository;
 import hackathon.kb.chakchak.domain.order.util.OrderToDtoMapper;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductProgressResponseDto;
 import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
-import hackathon.kb.chakchak.domain.product.util.ProductToDtoMapper;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import java.util.Comparator;
@@ -76,33 +75,4 @@ public class BuyerService {
                 .orders(items)
                 .build();
     }
-
-    public BuyerOrderListResponse getBuyerOrders(Long buyerId) {
-        Buyer buyer = buyerRepository.findByIdWithOrdersAndProduct(buyerId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
-
-        // 1) 전체 주문 + 상품 로딩 (fetch join)
-        List<Order> orders = orderRepository.findAllWithProductByBuyer(buyerId);
-
-        // 3) DTO 매핑 (집계값 주입)
-        List<OrderResponseDto> items = orders.stream().map(o -> {
-            var p = o.getProduct();
-
-            ProductProgressResponseDto present = productRepository.findProgressByProductId(p.getId());
-            return OrderResponseDto.builder()
-                    .orderId(o.getId())
-                    .quantity(o.getQuantity())
-                    .isSent(o.getIsSent())
-                    .deliveryCode(o.getDeliveryCode())
-                    .orderStatus(o.getStatus())
-                    .productPreview(ProductToDtoMapper.productToProductPreviewResponseDto(p, present))
-                    .build();
-        }).toList();
-
-        return BuyerOrderListResponse.builder()
-                .orders(items)
-                .build();
-    }
-
-
 }
