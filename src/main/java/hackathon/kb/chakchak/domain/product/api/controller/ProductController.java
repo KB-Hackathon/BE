@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
-@Tag(name = "상품 관련 API", description = "gpt 기반 문구 생성 / 상품 등록용 API")
+@Tag(name = "상품 관련 API", description = "gpt 기반 문구 생성 / 상품 등록 / 상품 조회 API")
 public class ProductController {
     private final ProductNarrativeService productNarrativeService;
     private final ProductCommandService productCommandService;

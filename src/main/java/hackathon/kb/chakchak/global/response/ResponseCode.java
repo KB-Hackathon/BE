@@ -1,9 +1,8 @@
 package hackathon.kb.chakchak.global.response;
 
-import org.springframework.http.HttpStatus;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -28,6 +27,7 @@ public enum ResponseCode {
 
 	//MEMBER
 	MEMBER_NOT_FOUND("MEM-001", HttpStatus.NOT_FOUND, "Member not found"),
+	SELLER_NOT_FOUND("SELLER-001", HttpStatus.NOT_FOUND, "Seller not found"),
 
 	// COUPON
 	COUPON_NOT_FOUND("CPN-001", HttpStatus.NOT_FOUND, "Coupon not found"),
