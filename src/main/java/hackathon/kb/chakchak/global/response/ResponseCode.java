@@ -31,6 +31,9 @@ public enum ResponseCode {
 
 	// COUPON
 	COUPON_NOT_FOUND("CPN-001", HttpStatus.NOT_FOUND, "Coupon not found"),
+
+	// PRODUCT
+	PRODUCT_NOT_FOUND("PRO-001", HttpStatus.NOT_FOUND, "Product not found"),
 	;
 
 	private final String code;

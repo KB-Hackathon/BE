@@ -1,6 +1,7 @@
 package hackathon.kb.chakchak.domain.product.repository;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
+import hackathon.kb.chakchak.domain.product.api.dto.ProductProgressResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
@@ -42,4 +43,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	Optional<Product> findById(long id);
 
 	List<Product> findBySeller(Seller seller);
+
+	// 특정 상품(공동구매글)의 참여 인원과 달성률 조회
+	@Query("""
+        SELECT
+        	p.id,
+        	count(o.id),
+        	cast(round((count(o.id) * 100.0 / p.targetAmount), 0) as int)
+        FROM Product p
+        LEFT JOIN p.orders o
+        WHERE p.id = :productId
+        GROUP BY p.id, p.targetAmount
+    """)
+	ProductProgressResponseDto findProgressByProductId(@Param("productId") Long productId);
 }
