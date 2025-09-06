@@ -1,10 +1,10 @@
 package hackathon.kb.chakchak.global.s3;
 
+import hackathon.kb.chakchak.global.response.BaseResponse;
 import java.net.URL;
 import java.util.List;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +24,7 @@ public class S3Controller {
 
 	@Operation(summary = "단일 이미지 업로드", description = "Multipart 단일 파일을 S3에 업로드합니다.")
 	@PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<UrlResponse> uploadImage(
+	public BaseResponse<UrlResponse> uploadImage(
 		@RequestPart("file") MultipartFile file,
 		@RequestParam(value = "dirPrefix", required = false) String dirPrefix
 	) {
@@ -32,12 +32,12 @@ public class S3Controller {
 			? s3StorageService.uploadImages(List.of(file), dirPrefix).get(0) // prefix 적용해서 업로드
 			: s3StorageService.uploadImages(file);                           // 단일 업로드 메서드 사용
 
-		return ResponseEntity.ok(new UrlResponse(url.toString()));
+		return BaseResponse.OK(new UrlResponse(url.toString()));
 	}
 
 	@Operation(summary = "다중 이미지 업로드", description = "Multipart 여러 파일을 S3에 업로드합니다.")
 	@PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<UrlListResponse> uploadImages(
+	public BaseResponse<UrlListResponse> uploadImages(
 		@RequestPart("files") List<MultipartFile> files,
 		@RequestParam(value = "dirPrefix", required = false) String dirPrefix
 	) {
@@ -45,21 +45,21 @@ public class S3Controller {
 			? s3StorageService.uploadImages(files, dirPrefix) // prefix 적용
 			: s3StorageService.uploadImages(files);           // prefix 없이
 
-		return ResponseEntity.ok(new UrlListResponse(urls.stream().map(URL::toString).toList()));
+		return BaseResponse.OK(new UrlListResponse(urls.stream().map(URL::toString).toList()));
 	}
 
 	@Operation(summary = "업로드된 이미지 URL 조회", description = "S3 key로 접근 가능한 URL을 반환합니다.")
 	@GetMapping("/image-url")
-	public ResponseEntity<UrlResponse> getImageUrl(@RequestParam("key") String key) {
+	public BaseResponse<UrlResponse> getImageUrl(@RequestParam("key") String key) {
 		URL url = s3StorageService.getImageUrl(key);
-		return ResponseEntity.ok(new UrlResponse(url.toString()));
+		return BaseResponse.OK(new UrlResponse(url.toString()));
 	}
 
 	@Operation(summary = "이미지 삭제", description = "S3에 업로드된 객체를 key로 삭제합니다.")
 	@DeleteMapping("/image")
-	public ResponseEntity<Void> deleteImage(@RequestParam("key") String key) {
+	public BaseResponse<Void> deleteImage(@RequestParam("key") String key) {
 		s3StorageService.deleteImage(key);
-		return ResponseEntity.noContent().build();
+		return BaseResponse.OK();
 	}
 
 	// --- 응답 DTO (간단히 record로) ---

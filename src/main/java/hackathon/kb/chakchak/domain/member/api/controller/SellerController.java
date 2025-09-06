@@ -28,12 +28,12 @@ public class SellerController {
 
     @Operation(summary = "사업자 등록", description = "사업자 등록번호를 토대로 관련된 사업자 정보를 반환합니다.")
     @PostMapping("/register")
-    public ResponseEntity<BizRegisterResponse> register(
+    public BaseResponse<BizRegisterResponse> register(
             @Valid @RequestBody BizRegisterRequest req,
             @AuthenticationPrincipal MemberPrincipal principal
     ) {
         Seller saved = sellerService.updateSellerFromApick(req.getBizNo(), principal.getId());
-        return ResponseEntity.ok(BizRegisterResponse.from(saved));
+        return BaseResponse.OK(BizRegisterResponse.from(saved));
     }
 
     @Operation(summary = "판매자 조회", description = "판매자 아이디를 기반으로, 판매자의 정보와 관련된 상품 글을 조회합니다.")
