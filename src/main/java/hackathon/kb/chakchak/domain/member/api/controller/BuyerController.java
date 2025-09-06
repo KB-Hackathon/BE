@@ -21,9 +21,9 @@ public class BuyerController {
 
     private final BuyerService buyerService;
 
-    @Operation(summary = "구매자 공구 조회", description = "구매자 아이디를 기반으로 구매자의 정보와 공동구매 리스트를 조회합니다.")
-    @GetMapping("/{buyerId}")
-    public BaseResponse<BuyerInfoAndFundingListResponse> getFundingList(@PathVariable(name = "buyerId") Long buyerId) {
-        return BaseResponse.OK(buyerService.getFundingList(buyerId));
+    @Operation(summary = "구매자 공구 조회", description = "구매자 아이디를 기반으로 공동구매 리스트를 조회합니다.")
+    @GetMapping("/orders/{buyerId}")
+    public BaseResponse<BuyerOrderListResponse> getOrderList(@PathVariable(name = "buyerId") Long buyerId) {
+        return BaseResponse.OK(buyerService.getOrderList(buyerId));
     }
 }
