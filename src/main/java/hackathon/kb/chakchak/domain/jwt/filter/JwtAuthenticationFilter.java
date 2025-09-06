@@ -34,9 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtIssuer jwtIssuer;
     private final RedisUtil redisUtil;
 
-    private static final String ACCESS_ERR  = "JWT_ACCESS_ERROR_CODE";
-    private static final String ACCESS_ERR_MSG = "JWT_ACCESS_ERROR_MSG";
-
     private static final String[] WHITELIST = {
             "/", "/index.html", "/favicon.ico", "/health/", "/health/**",
             "/api/oauth/**", "/login/**", "/oauth2/**", "/oauth2/authorization/kakao/**", "/api/oauth/signup/additional",
@@ -65,16 +62,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        log.info("검증할 access token 값: {}", accessToken);
-
         // 블랙리스트(로그아웃) 방어
         if (redisUtil.hasKeyBlackList(accessToken)) {
-            // 전역 예외 처리기가 있다면 예외 던지기
-            // throw new CustomException("로그아웃된 사용자 입니다.");
-            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            res.setContentType("application/json;charset=UTF-8");
-            res.getWriter().write("{\"code\":\"LOGGED_OUT\"}");
+            log.debug("Access token is blacklisted");
+            markError(req, "logged out token", JwtErrorCode.LOGGED_OUT);
+            SecurityContextHolder.clearContext();
+            chain.doFilter(req, res);
             return;
+//            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            res.setContentType("application/json;charset=UTF-8");
+//            res.getWriter().write("{\"code\":\"LOGGED_OUT\"}");
+//            return;
         }
 
         try {
@@ -96,33 +94,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                markError(req,  JwtErrorCode.INVALID, "Not an access token (typ mismatch)");
+                markError(req, "Not an access token (typ mismatch)",  JwtErrorCode.INVALID);
                 SecurityContextHolder.clearContext();
             }
 
         } catch (ExpiredJwtException e) {
             log.debug("ACCESS expired", e);
-            markError(req, JwtErrorCode.EXPIRED, e.getMessage());
+            markError(req, e.getMessage(), JwtErrorCode.EXPIRED);
             SecurityContextHolder.clearContext();
         } catch (MalformedJwtException e) {
             log.debug("ACCESS malformed", e);
-            markError(req, JwtErrorCode.MALFORMED, e.getMessage());
+            markError(req, e.getMessage(), JwtErrorCode.MALFORMED);
             SecurityContextHolder.clearContext();
         } catch (SignatureException e) {
             log.debug("ACCESS bad signature", e);
-            markError(req,JwtErrorCode.INVALID_SIGNATURE, e.getMessage());
+            markError(req, e.getMessage(), JwtErrorCode.INVALID_SIGNATURE);
             SecurityContextHolder.clearContext();
         } catch (UnsupportedJwtException e) {
             log.debug("ACCESS unsupported", e);
-            markError(req, JwtErrorCode.UNSUPPORTED, e.getMessage());
+            markError(req, e.getMessage(), JwtErrorCode.UNSUPPORTED);
             SecurityContextHolder.clearContext();
         } catch (IllegalArgumentException e) {
             log.debug("ACCESS illegal arg", e);
-            markError(req, JwtErrorCode.ILLEGAL_ARGUMENT, e.getMessage());
+            markError(req, e.getMessage(), JwtErrorCode.ILLEGAL_ARGUMENT);
             SecurityContextHolder.clearContext();
         } catch (JwtException e) {
             log.debug("ACCESS invalid", e);
-            markError(req, JwtErrorCode.INVALID, e.getMessage());
+            markError(req, e.getMessage(), JwtErrorCode.INVALID);
             SecurityContextHolder.clearContext();
         }
 
@@ -141,9 +139,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authorization.substring(7); // return token
     }
 
-    private void markError(HttpServletRequest req, JwtErrorCode code, String msg) {
-        req.setAttribute(ACCESS_ERR, code);
-        if (msg != null) req.setAttribute(ACCESS_ERR_MSG, msg);
+    private void markError(HttpServletRequest req, String msg, JwtErrorCode code) {
+        req.setAttribute(msg, code);
     }
 }
 

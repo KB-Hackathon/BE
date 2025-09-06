@@ -1,6 +1,5 @@
 package hackathon.kb.chakchak.domain.order.api.controller;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,11 +20,11 @@ public class OrderController {
 	private final OrderService orderService;
 
 	@PostMapping("/coupon")
-	public ResponseEntity<BaseResponse<CouponOrderRes>> orderCoupon(@AuthenticationPrincipal MemberPrincipal principal,
+	public BaseResponse<CouponOrderRes> orderCoupon(@AuthenticationPrincipal MemberPrincipal principal,
 		CouponOrderReq couponOrderReq) {
 		CouponOrderRes res = orderService.orderCoupon(principal.getId(), couponOrderReq);
 
-		return ResponseEntity.ok(BaseResponse.OK(res));
+		return BaseResponse.OK(res);
 	}
 
 }
