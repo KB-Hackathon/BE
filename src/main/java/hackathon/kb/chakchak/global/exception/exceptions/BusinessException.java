@@ -13,10 +13,15 @@ public class BusinessException extends RuntimeException {
 	private Common common;
 
 	public BusinessException(ResponseCode responseCode) {
+		super(responseCode.getMessage());
 		this.responseCode = responseCode;
+		this.logLevel = null;
+		this.txId = null;
+		this.common = null;
 	}
 
 	public BusinessException(ResponseCode responseCode, LogLevel logLevel, String txId, Common common) {
+		super(responseCode.getMessage());
 		this.responseCode = responseCode;
 		this.logLevel = logLevel;
 		this.txId = txId;
