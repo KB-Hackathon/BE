@@ -33,4 +33,12 @@ public class MemberService {
         m.setIsDeleted(true);
         // s3에서 이미지 삭제해야 함
     }
+
+    @Transactional(readOnly = true)
+    public MemberProfileResponse getBuyerProfile(Long buyerId) {
+        Member buyer = memberRepository.findById(buyerId)
+                .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
+
+        return MemberProfileResponse.from(buyer);
+    }
 }

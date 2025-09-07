@@ -30,14 +30,6 @@ public class BuyerService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
 
-    @Transactional(readOnly = true)
-    public MemberProfileResponse getBuyerProfile(Long buyerId) {
-        Buyer b = buyerRepository.findById(buyerId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
-
-        return MemberProfileResponse.from(b);
-    }
-
 
     public BuyerOrderListResponse getOrderList(Long buyerId) {
 

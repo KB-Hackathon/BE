@@ -20,12 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "BUYER API", description = "구매자 관련 API")
 public class BuyerController {
 
+    private final MemberService memberService;
     private final BuyerService buyerService;
 
     @Operation(summary = "구매자 기본 정보 조회", description = "구매자 아이디를 기반으로 구매자 기본 정보를 조회합니다.")
     @GetMapping("/{buyerId}")
     public BaseResponse<MemberProfileResponse> getBuyerProfile(@PathVariable(name = "buyerId") Long buyerId) {
-        return BaseResponse.OK(buyerService.getBuyerProfile(buyerId));
+        return BaseResponse.OK(memberService.getBuyerProfile(buyerId));
     }
 
     @Operation(summary = "구매자 공구 조회", description = "구매자 아이디를 기반으로 공동구매 리스트(최신순)를 조회합니다.")
