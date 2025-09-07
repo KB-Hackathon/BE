@@ -55,6 +55,15 @@ public class BaseResponse<T> {
 				.build();
 	}
 
+	public static <T> BaseResponse<T> ERROR(String code, HttpStatus httpStatus, String message, T data) {
+		return BaseResponse.<T>builder()
+				.code(code)
+				.status(httpStatus)
+				.message(message)
+				.data(data)
+				.build();
+	}
+
 	public static <T> BaseResponse<T> buildResponse(ResponseCode code,T data) {
 
 		return BaseResponse
