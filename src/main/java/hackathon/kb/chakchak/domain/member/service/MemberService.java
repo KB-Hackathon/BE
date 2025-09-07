@@ -19,7 +19,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberProfileResponse getMyProfile(Long memberId) {
         Member m = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
 
         return MemberProfileResponse.from(m);
     }
@@ -32,5 +32,13 @@ public class MemberService {
         // soft delete
         m.setIsDeleted(true);
         // s3에서 이미지 삭제해야 함
+    }
+
+    @Transactional(readOnly = true)
+    public MemberProfileResponse getBuyerProfile(Long buyerId) {
+        Member buyer = memberRepository.findById(buyerId)
+                .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
+
+        return MemberProfileResponse.from(buyer);
     }
 }
