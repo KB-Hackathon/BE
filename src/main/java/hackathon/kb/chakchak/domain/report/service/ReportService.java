@@ -20,7 +20,7 @@ public class ReportService {
 
 	private final ReportRepository reportRepository;
 
-	public BaseResponse<ReportResponseDto> getReportBySellerId(Long sellerId) {
+	public ReportResponseDto getReportBySellerId(Long sellerId) {
 		Report report = reportRepository.findBySellerId(sellerId)
 			.orElseThrow(() -> new BusinessException(ResponseCode.REPORT_NOT_FOUND));
 
@@ -33,7 +33,7 @@ public class ReportService {
 		// 3. 성별 분포 계산
 		Map<String, Integer> genderDistribution = calcGenderDistribution(report);
 
-		ReportResponseDto responseDto = ReportResponseDto.builder()
+		return ReportResponseDto.builder()
 			.totalSales(report.getTotalSales())
 			.successCnt(report.getSuccessCnt())
 			.failedCnt(report.getFailedCnt())
@@ -41,8 +41,6 @@ public class ReportService {
 			.ageDistribution(ageDistribution)
 			.genderDistribution(genderDistribution)
 			.build();
-
-		return BaseResponse.OK(responseDto);
 	}
 
 	private int calcSuccessRate(int success, int fail) {

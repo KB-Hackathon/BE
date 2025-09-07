@@ -23,6 +23,6 @@ public class ReportController {
 	@Operation(summary = "리포트 조회", description = "판매자 id로 리포트를 조회합니다.")
 	@GetMapping("/{sellerId}")
 	public BaseResponse<ReportResponseDto> getReport(@PathVariable Long sellerId) {
-		return reportService.getReportBySellerId(sellerId);
+		return BaseResponse.OK(reportService.getReportBySellerId(sellerId));
 	}
 }
