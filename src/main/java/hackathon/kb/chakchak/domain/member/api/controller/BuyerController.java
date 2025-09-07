@@ -3,6 +3,7 @@ package hackathon.kb.chakchak.domain.member.api.controller;
 import hackathon.kb.chakchak.domain.member.api.dto.res.BuyerOrderListResponse;
 import hackathon.kb.chakchak.domain.member.api.dto.res.MemberProfileResponse;
 import hackathon.kb.chakchak.domain.member.service.BuyerService;
+import hackathon.kb.chakchak.domain.member.service.MemberService;
 import hackathon.kb.chakchak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

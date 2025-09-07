@@ -94,10 +94,7 @@ public class ProductToDtoMapper {
 				.status(product.getStatus())
 				.targetAmount(product.getTargetAmount())
 				.recruitmentEndPeriod(product.getRecruitmentEndPeriod())
-				.productProgressResponseDto(progress != null
-						? progress
-						: new ProductProgressResponseDto(product.getId(), 0L, 0) // 기본값
-				)
+				.productProgressResponseDto(progress)
 				.build();
 	}
 }

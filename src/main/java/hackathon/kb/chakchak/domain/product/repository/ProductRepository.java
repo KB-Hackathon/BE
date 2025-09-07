@@ -56,18 +56,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         GROUP BY p.id, p.targetAmount
     """)
 	ProductProgressResponseDto findProgressByProductId(@Param("productId") Long productId);
-
-	@Query("""
-    SELECT new hackathon.kb.chakchak.domain.product.api.dto.ProductProgressResponseDto(
-      p.id,
-      count(o.id),
-      cast(round((count(o.id) * 100.0 / max(p.targetAmount)), 0) as int)
-    )
-    FROM Product p
-    LEFT JOIN p.orders o
-    WHERE p.id IN :productIds
-    GROUP BY p.id
-""")
-	List<ProductProgressResponseDto> findProgressDtoByProductIds(@Param("productIds") List<Long> productIds);
-
 }
