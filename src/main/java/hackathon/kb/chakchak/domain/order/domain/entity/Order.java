@@ -1,6 +1,6 @@
 package hackathon.kb.chakchak.domain.order.domain.entity;
 
-import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
+import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.order.domain.enums.OrderStatus;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
@@ -22,7 +22,7 @@ public class Order extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "buyer_id")
-	private Buyer buyer;
+	private Member buyer;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id")

@@ -35,6 +35,26 @@ public class BaseResponse<T> {
 			.build();
 	}
 
+	public static <T> BaseResponse<T> ERROR(ResponseCode rc) {
+		return BaseResponse
+				.<T>builder()
+				.code(rc.getCode())
+				.status(rc.getStatus())
+				.message(rc.getMessage())
+				.data(null)
+				.build();
+	}
+
+	public static <T> BaseResponse<T> ERROR(ResponseCode rc, String customMessage) {
+		return BaseResponse
+				.<T>builder()
+				.code(rc.getCode())
+				.status(rc.getStatus())
+				.message(customMessage)
+				.data(null)
+				.build();
+	}
+
 	public static <T> BaseResponse<T> buildResponse(ResponseCode code,T data) {
 
 		return BaseResponse
