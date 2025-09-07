@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
+import hackathon.kb.chakchak.domain.order.domain.entity.Order;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -13,8 +16,10 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
 	Optional<Order> findById(Long id);
-
+  
+	List<Order> findByBuyer(Buyer buyer);
 	List<Order> findByBuyer_Id(Long buyerId);
+
 
 	@Query("""
 		SELECT o

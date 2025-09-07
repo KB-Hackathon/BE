@@ -1,7 +1,8 @@
-package hackathon.kb.chakchak.domain.order.domain.entity;
+package hackathon.kb.chakchak.domain.escrow.domain.entity;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 
+import hackathon.kb.chakchak.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,7 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,33 +21,23 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Builder
-@Table(name = "coupon")
+@Table(name = "escrow_history")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Coupon {
+public class EscrowHistory extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "coupon_id")
+	@Column(name = "escrow_history_id")
 	private Long id;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", nullable = false)
-	private Order order;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "escrow_id")
+	private Escrow escrow;
 
-	private LocalDate expiration;
+	private String transactionId;
 
-	private String uuid;
+	private BigDecimal amount;
 
-	private Boolean isUsed = false;
-
-	private Boolean isActivate = false;
-
-	public void useCoupon() {
-		this.isUsed = true;
-	}
-
-	public void activeCoupon() {
-		this.isActivate = true;
-	}
+	private String buyerAccount;
 }
