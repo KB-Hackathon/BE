@@ -1,6 +1,5 @@
 package hackathon.kb.chakchak.domain.order.service;
 
-import hackathon.kb.chakchak.domain.member.domain.dto.CouponInfo;
 import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
 import hackathon.kb.chakchak.domain.member.repository.BuyerRepository;
 import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
@@ -16,7 +15,6 @@ import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
-import io.swagger.v3.core.jackson.mixin.MediaTypeMixin;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -86,15 +84,6 @@ public class CouponService {
         }
 
         return couponRepository.findCoupon(couponId);
-    }
-
-    @Transactional(readOnly = true)
-    public CouponItemDto getBuyerCoupon(Long buyerId, Long couponId) {
-        if (!buyerRepository.existsById(buyerId)) {
-            throw new BusinessException(ResponseCode.BUYER_NOT_FOUND);
-        }
-        return couponRepository.findBuyerCouponById(buyerId, couponId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.COUPON_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)

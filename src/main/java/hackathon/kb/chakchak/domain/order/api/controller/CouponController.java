@@ -35,13 +35,6 @@ public class CouponController {
         return BaseResponse.OK(couponService.getCouponInfo(couponId));
     }
 
-//    @Operation(summary = "구매자 쿠폰 상세 - 쿠폰 id로 조회", description = "쿠폰 ID로 단일 쿠폰 정보를 조회합니다.")
-//    @GetMapping("/buyers/{buyerId}/coupons/{couponId}")
-//    public BaseResponse<CouponItemDto> getBuyerCoupon(
-//            @PathVariable Long buyerId,
-//            @PathVariable Long couponId) {
-//        return BaseResponse.OK(couponService.getBuyerCoupon(buyerId, couponId));
-//    }
 
     @Operation(summary = "쿠폰 uuid로 쿠폰 조회", description = "쿠폰 UUID로 단일 쿠폰 정보를 조회합니다.")
     @GetMapping("")
