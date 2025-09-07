@@ -1,9 +1,8 @@
 package hackathon.kb.chakchak.global.response;
 
-import org.springframework.http.HttpStatus;
-
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Builder
@@ -19,6 +18,7 @@ public class BaseResponse<T> {
 		return BaseResponse
 			.<T>builder()
 			.code(code.getCode())
+				.status(code.getStatus())
 			.message(code.getMessage())
 			.data(data)
 			.build();
@@ -30,8 +30,38 @@ public class BaseResponse<T> {
 		return BaseResponse
 			.<T>builder()
 			.code(code.getCode())
+				.status(code.getStatus())
 			.message(code.getMessage())
 			.build();
+	}
+
+	public static <T> BaseResponse<T> ERROR(ResponseCode rc) {
+		return BaseResponse
+				.<T>builder()
+				.code(rc.getCode())
+				.status(rc.getStatus())
+				.message(rc.getMessage())
+				.data(null)
+				.build();
+	}
+
+	public static <T> BaseResponse<T> ERROR(ResponseCode rc, String customMessage) {
+		return BaseResponse
+				.<T>builder()
+				.code(rc.getCode())
+				.status(rc.getStatus())
+				.message(customMessage)
+				.data(null)
+				.build();
+	}
+
+	public static <T> BaseResponse<T> ERROR(String code, HttpStatus httpStatus, String message, T data) {
+		return BaseResponse.<T>builder()
+				.code(code)
+				.status(httpStatus)
+				.message(message)
+				.data(data)
+				.build();
 	}
 
 	public static <T> BaseResponse<T> buildResponse(ResponseCode code,T data) {
@@ -39,6 +69,7 @@ public class BaseResponse<T> {
 		return BaseResponse
 			.<T>builder()
 			.code(code.getCode())
+				.status(code.getStatus())
 			.message(code.getMessage())
 			.data(data)
 			.build();

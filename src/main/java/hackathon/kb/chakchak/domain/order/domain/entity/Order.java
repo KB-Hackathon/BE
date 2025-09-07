@@ -1,26 +1,11 @@
 package hackathon.kb.chakchak.domain.order.domain.entity;
 
-import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
+import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.order.domain.enums.OrderStatus;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
@@ -37,13 +22,13 @@ public class Order extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "buyer_id")
-	private Buyer buyer;
+	private Member buyer;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id")
 	private Product product;
 
-	@OneToOne(mappedBy = "coupon", fetch = FetchType.LAZY)
+	@OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
 	private Coupon coupon;
 
 	@Column(nullable = false)

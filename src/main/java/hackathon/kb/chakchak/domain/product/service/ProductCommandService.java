@@ -2,9 +2,15 @@ package hackathon.kb.chakchak.domain.product.service;
 
 import hackathon.kb.chakchak.domain.capture.domain.Capture;
 import hackathon.kb.chakchak.domain.capture.repository.CaptureRepository;
+import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
+import hackathon.kb.chakchak.domain.member.repository.SellerRepository;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveRequest;
+import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveResponse;
+import hackathon.kb.chakchak.domain.product.domain.entity.Image;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
 import hackathon.kb.chakchak.domain.product.domain.entity.Tag;
+import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
+import hackathon.kb.chakchak.domain.product.repository.ImageRepository;
 import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
 import hackathon.kb.chakchak.domain.product.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,49 +25,89 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class ProductCommandService {
+
     private final ProductRepository productRepository;
     private final TagRepository tagRepository;
+    private final ImageRepository imageRepository;
     private final CaptureRepository captureRepository;
+    private final SellerRepository sellerRepository;
 
-    public Long saveProduct(ProductSaveRequest req) {
-        if (req == null || req.getProductId() == null) {
-            throw new IllegalArgumentException("productId가 필요합니다.");
-        }
+    /**
+     * 새 상품 저장 (생성)
+     * @param sellerId 판매자 ID
+     * @param req      요청 DTO
+     * @return 생성된 상품 ID
+     */
+    public ProductSaveResponse saveProduct(Long sellerId, ProductSaveRequest req) {
+        // 생성 전 유효성 간단 체크
+        if (req == null) throw new IllegalArgumentException("요청이 비어 있습니다.");
+        if (req.getTitle() == null || req.getTitle().isBlank()) throw new IllegalArgumentException("title은 필수입니다.");
+        if (req.getPrice() == null) throw new IllegalArgumentException("price는 필수입니다.");
+        if (req.getDescription() == null || req.getDescription().isBlank()) throw new IllegalArgumentException("description은 필수입니다.");
+        if (req.getRecruitmentStartPeriod() == null || req.getRecruitmentEndPeriod() == null)
+            throw new IllegalArgumentException("모집 기간(recruitmentStart/End)은 필수입니다.");
 
-        Product product = productRepository.findById(req.getProductId())
-                .orElseThrow(() -> new IllegalStateException("Product 없음: id=" + req.getProductId()));
+        // 판매자 로드
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다. id=" + sellerId));
 
-        // 1) endCaptureId: 매번 새로운 capture 생성 → PK 세팅
-        Long newEndCaptureId = captureRepository.save(new Capture()).getId();
-        product.changeEndCaptureId(newEndCaptureId);
+        // 캡처 생성 → endCaptureId 세팅
+        Long endCaptureId = captureRepository.save(new Capture()).getId();
 
-        // 2) 단순 필드 업데이트 (null 이면 기존값 유지)
-        product.changeDescription(req.getDescription());
-        product.changePrice(req.getPrice());
-        product.changeCoupon(req.getIsCoupon());
-        product.changeTargetAmount(req.getTargetAmount());
-        product.changeRecruitmentPeriods(req.getRecruitmentStartPeriod(), req.getRecruitmentEndPeriod());
+        // 쿠폰 메타 변환
+        boolean useCoupon = Boolean.TRUE.equals(req.getIsCoupon());
 
-        // 3) status는 무조건 PENDING
-        product.markPending();
+        // 상품 엔티티 생성
+        Product product = Product.builder()
+                .seller(seller)
+                .endCaptureId(endCaptureId)
+                .title(req.getTitle())
+                .category(req.getCategory())
+                .price(req.getPrice())
+                .description(req.getDescription())
+                .status(ProductStatus.PENDING)
+                .targetAmount(req.getTargetAmount())
+                .isCoupon(useCoupon)
+                .couponName(useCoupon ? req.getCouponName() : null)
+                .couponExpiration(useCoupon ? req.getCouponExpiration() : null)
+                .recruitmentStartPeriod(req.getRecruitmentStartPeriod())
+                .recruitmentEndPeriod(req.getRecruitmentEndPeriod())
+                .refreshCnt((short) 0)
+                .refreshedAt(LocalDateTime.now())
+                .build();
 
-        // 4) refreshedAt 갱신
-        product.touchRefreshedAt(LocalDateTime.now());
+        // 먼저 상품 저장 (FK 필요)
+        productRepository.save(product);
 
-        // 5) 태그 갈아끼우기
+        // 태그 저장
         if (req.getTags() != null) {
-            List<Tag> toSave = new ArrayList<>();
+            List<Tag> tags = new ArrayList<>();
             for (String name : req.getTags()) {
                 if (name == null || name.isBlank()) continue;
-                toSave.add(Tag.builder()
+                tags.add(Tag.builder()
                         .product(product)
                         .name(name.trim())
                         .build());
             }
-            if (!toSave.isEmpty()) tagRepository.saveAll(toSave);
+            if (!tags.isEmpty()) tagRepository.saveAll(tags);
         }
 
-        // 영속성 컨텍스트 변경감지로 UPDATE 수행됨
-        return product.getId();
+        // 이미지 저장
+        if (req.getImages() != null) {
+            List<Image> images = new ArrayList<>();
+            for (String url : req.getImages()) {
+                if (url == null) continue;
+                url = url.trim();
+                if (url.isEmpty()) continue;
+
+                images.add(Image.builder()
+                        .product(product)
+                        .url(url)
+                        .build());
+            }
+            if (!images.isEmpty()) imageRepository.saveAll(images);
+        }
+
+        return new ProductSaveResponse(product.getId());
     }
 }

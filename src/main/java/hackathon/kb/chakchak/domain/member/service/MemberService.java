@@ -4,6 +4,7 @@ import hackathon.kb.chakchak.domain.member.api.dto.res.MemberProfileResponse;
 import hackathon.kb.chakchak.domain.member.domain.entity.Member;
 import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
+import hackathon.kb.chakchak.global.s3.service.S3StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import hackathon.kb.chakchak.global.response.ResponseCode;
@@ -13,11 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final S3StorageService s3StorageService;
 
     @Transactional(readOnly = true)
     public MemberProfileResponse getMyProfile(Long memberId) {
         Member m = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
 
         return MemberProfileResponse.from(m);
     }
@@ -29,5 +31,14 @@ public class MemberService {
 
         // soft delete
         m.setIsDeleted(true);
+        // s3에서 이미지 삭제해야 함
+    }
+
+    @Transactional(readOnly = true)
+    public MemberProfileResponse getBuyerProfile(Long buyerId) {
+        Member buyer = memberRepository.findById(buyerId)
+                .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
+
+        return MemberProfileResponse.from(buyer);
     }
 }

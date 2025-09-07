@@ -5,8 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SignupTokens {
-    private final boolean registered;   // 항상 true (완료 후)
+public class TokensResponse {
     private final String accessToken;
     private final String refreshToken;
 }
