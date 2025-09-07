@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtIssuer jwtIssuer;
     private final RedisUtil redisUtil;
 
+    public static final String ACCESS_ERR_CODE = "JWT_ACCESS_ERROR_CODE";
+    public static final String ACCESS_ERR_MSG  = "JWT_ACCESS_ERROR_MSG";
+    public static final String ACCESS_ERR_STATUS = "JWT_ACCESS_ERROR_STATUS";
+
     private static final String[] WHITELIST = {
             "/", "/index.html", "/favicon.ico", "/health/", "/health/**",
             "/api/oauth/**", "/login/**", "/oauth2/**", "/oauth2/authorization/kakao/**", "/api/oauth/signup/additional",
@@ -49,7 +54,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return PatternMatchUtils.simpleMatch(WHITELIST, uri);
     }
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
@@ -64,8 +68,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 블랙리스트(로그아웃) 방어
         if (redisUtil.hasKeyBlackList(accessToken)) {
-            log.debug("Access token is blacklisted");
-            markError(req, "logged out token", JwtErrorCode.LOGGED_OUT);
+            log.info("Access token is blacklisted");
+            markError(req, "Access token is blacklisted", HttpStatus.UNAUTHORIZED, "LOGGED_OUT");
             SecurityContextHolder.clearContext();
             chain.doFilter(req, res);
             return;
@@ -94,33 +98,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                markError(req, "Not an access token (typ mismatch)",  JwtErrorCode.INVALID);
+                markError(req, "Not an access token (typ mismatch)", HttpStatus.UNAUTHORIZED, "TYP_MISMATCH - filter");
                 SecurityContextHolder.clearContext();
             }
 
         } catch (ExpiredJwtException e) {
-            log.debug("ACCESS expired", e);
-            markError(req, e.getMessage(), JwtErrorCode.EXPIRED);
+            log.info("ACCESS expired", e);
+            markError(req, e.getMessage(), HttpStatus.UNAUTHORIZED, "EXPIRED - filter");
             SecurityContextHolder.clearContext();
         } catch (MalformedJwtException e) {
-            log.debug("ACCESS malformed", e);
-            markError(req, e.getMessage(), JwtErrorCode.MALFORMED);
+            log.info("ACCESS malformed", e);
+            markError(req, e.getMessage(), HttpStatus.UNAUTHORIZED, "MALFORMED - filter");
             SecurityContextHolder.clearContext();
         } catch (SignatureException e) {
-            log.debug("ACCESS bad signature", e);
-            markError(req, e.getMessage(), JwtErrorCode.INVALID_SIGNATURE);
+            log.info("ACCESS bad signature", e);
+            markError(req, e.getMessage(), HttpStatus.UNAUTHORIZED, "INVALID_SIGNATURE - filter");
             SecurityContextHolder.clearContext();
         } catch (UnsupportedJwtException e) {
-            log.debug("ACCESS unsupported", e);
-            markError(req, e.getMessage(), JwtErrorCode.UNSUPPORTED);
+            log.info("ACCESS unsupported", e);
+            markError(req, e.getMessage(), HttpStatus.UNAUTHORIZED, "CODE_UNSUPPORTED - filter");
             SecurityContextHolder.clearContext();
         } catch (IllegalArgumentException e) {
-            log.debug("ACCESS illegal arg", e);
-            markError(req, e.getMessage(), JwtErrorCode.ILLEGAL_ARGUMENT);
+            log.info("ACCESS illegal arg", e);
+            markError(req, e.getMessage(), HttpStatus.UNAUTHORIZED, "ILLEGAL_ARGUMENT - filter");
             SecurityContextHolder.clearContext();
         } catch (JwtException e) {
-            log.debug("ACCESS invalid", e);
-            markError(req, e.getMessage(), JwtErrorCode.INVALID);
+            log.info("ACCESS invalid", e);
+            markError(req, e.getMessage(), HttpStatus.UNAUTHORIZED, "INVALID - filter");
             SecurityContextHolder.clearContext();
         }
 
@@ -139,8 +143,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authorization.substring(7); // return token
     }
 
-    private void markError(HttpServletRequest req, String msg, JwtErrorCode code) {
-        req.setAttribute(msg, code);
+    private void markError(HttpServletRequest req, String msg, HttpStatus status, String code) {
+        req.setAttribute(ACCESS_ERR_STATUS, status);
+        req.setAttribute(ACCESS_ERR_MSG, msg);
+        req.setAttribute(ACCESS_ERR_CODE, code);
     }
 }
 
