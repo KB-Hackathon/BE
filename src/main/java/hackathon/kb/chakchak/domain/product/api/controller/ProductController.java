@@ -32,7 +32,7 @@ public class ProductController {
             @RequestBody ProductMetaRequest meta,
             @AuthenticationPrincipal MemberPrincipal principal
     ) {
-        return BaseResponse.OK(productNarrativeService.createNarrative(1L, meta));
+        return BaseResponse.OK(productNarrativeService.createNarrative(principal.getId(), meta));
     }
 
     @Operation(summary = "카테고리 / 모집상태 / 거래방식별 조회", description = "카테고리 / 모집상태 / 거래방식별 상품을 조회합니다. 10개를 반환하도록 하였습니다.")
