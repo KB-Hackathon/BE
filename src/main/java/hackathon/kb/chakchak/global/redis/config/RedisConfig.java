@@ -16,7 +16,6 @@ import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 
 @Configuration
-@PropertySource("classpath:application.yml")
 public class RedisConfig {
 
 	@Value("${spring.redis.host}")
