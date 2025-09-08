@@ -1,8 +1,9 @@
 package hackathon.kb.chakchak.domain.report.service;
 
+import hackathon.kb.chakchak.domain.report.api.dto.ReportAgeDistributionResponse;
+import hackathon.kb.chakchak.domain.report.api.dto.ReportGenderDistributionResponse;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -10,7 +11,6 @@ import hackathon.kb.chakchak.domain.report.api.dto.ReportResponseDto;
 import hackathon.kb.chakchak.domain.report.domain.entity.Report;
 import hackathon.kb.chakchak.domain.report.repository.ReportRepository;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
-import hackathon.kb.chakchak.global.response.BaseResponse;
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 
@@ -28,10 +28,10 @@ public class ReportService {
 		int successRate = calcSuccessRate(report.getSuccessCnt(), report.getFailedCnt());
 
 		// 2. 연령대 분포 계산
-		Map<String, Integer> ageDistribution = calcAgeDistribution(report);
+		ReportAgeDistributionResponse ageDistribution = calcAgeDistribution(report);
 
 		// 3. 성별 분포 계산
-		Map<String, Integer> genderDistribution = calcGenderDistribution(report);
+		ReportGenderDistributionResponse genderDistribution = calcGenderDistribution(report);
 
 		return ReportResponseDto.builder()
 			.totalSales(report.getTotalSales())
@@ -54,7 +54,7 @@ public class ReportService {
 	 * 합계 = 100
 	 * 보정치는 가장 큰 값에 반영
 	 */
-	private Map<String, Integer> calcAgeDistribution(Report report) {
+	private ReportAgeDistributionResponse calcAgeDistribution(Report report) {
 		int over10 = nullToZero(report.getOver10());
 		int over20 = nullToZero(report.getOver20());
 		int over30 = nullToZero(report.getOver30());
@@ -63,7 +63,12 @@ public class ReportService {
 		int over60 = nullToZero(report.getOver60());
 
 		int sum = over10 + over20 + over30 + over40 + over50 + over60;
-		if (sum == 0) return Map.of("데이터 없음", 100);
+		if (sum == 0) {
+			return ReportAgeDistributionResponse.builder()
+					.over10(0).over20(0).over30(0)
+					.over40(0).over50(0).over60(0)
+					.build();
+		}
 
 		int ten    = (int) Math.round(over10 * 100.0 / sum);
 		int twenty = (int) Math.round(over20 * 100.0 / sum);
@@ -84,19 +89,23 @@ public class ReportService {
 		else if (maxValue == fifty) fifty += diff;
 		else sixty += diff;
 
-		return Map.of(
-			"10대", ten,
-			"20대", twenty,
-			"30대", thirty,
-			"40대", forty,
-			"50대", fifty,
-			"60대 이상", sixty
-		);
+		return ReportAgeDistributionResponse.builder()
+				.over10(ten)
+				.over20(twenty)
+				.over30(thirty)
+				.over40(forty)
+				.over50(fifty)
+				.over60(sixty)
+				.build();
 	}
 
-	private Map<String, Integer> calcGenderDistribution(Report r) {
+	private ReportGenderDistributionResponse calcGenderDistribution(Report r) {
 		int sum = nullToZero(r.getMaleCnt()) + nullToZero(r.getFemaleCnt());
-		if (sum == 0) return Map.of("데이터 없음", 100);
+		if (sum == 0) {
+			return ReportGenderDistributionResponse.builder()
+					.maleCnt(0).femaleCnt(0)
+					.build();
+		}
 
 		int male = (int) Math.round(nullToZero(r.getMaleCnt()) * 100.0 / sum);
 		int female = (int) Math.round(nullToZero(r.getFemaleCnt()) * 100.0 / sum);
@@ -107,10 +116,9 @@ public class ReportService {
 		if (male >= female) male += diff;
 		else female += diff;
 
-		return Map.of(
-			"남성", male,
-			"여성", female
-		);
+		return ReportGenderDistributionResponse.builder()
+				.maleCnt(male).femaleCnt(female)
+				.build();
 	}
 
 	private int nullToZero(Integer v) { return v == null ? 0 : v; }
