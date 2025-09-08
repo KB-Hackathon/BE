@@ -13,6 +13,9 @@ import hackathon.kb.chakchak.domain.product.util.ProductToDtoMapper;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,11 +37,29 @@ public class BuyerService {
         // SUCCESS, PENDING만
         List<Order> orders = orderRepository.findOrdersWithProductByBuyer(buyerId);
 
+        if (orders.isEmpty()) {
+            return BuyerOrderListResponse.builder()
+                    .orders(List.of())
+                    .build();
+        }
+
+        // 뽑은 order 리스트 중에서 해당되는 상품ID list
+        List<Long> productIds = orders.stream()
+                .map(o -> o.getProduct().getId())
+                .distinct()
+                .toList();
+
+        Map<Long, ProductProgressResponseDto> progressMap =
+                productRepository.findProgressByProductIds(productIds).stream()
+                        .map(v -> new ProductProgressResponseDto(v.getId(), v.getOrderCount(), v.getPercentAchieved()))
+                        .collect(Collectors.toMap(ProductProgressResponseDto::id, Function.identity()));
+
+
         // DTO 매핑
         List<OrderResponseDto> items = orders.stream().map(o -> {
             Product p = o.getProduct();
             // 상품에 대한 집계값
-            ProductProgressResponseDto progress = productRepository.findProgressByProductId(p.getId());
+            ProductProgressResponseDto progress = progressMap.get(p.getId());
             return OrderResponseDto.builder()
                     .orderId(o.getId())
                     .quantity(o.getQuantity())
