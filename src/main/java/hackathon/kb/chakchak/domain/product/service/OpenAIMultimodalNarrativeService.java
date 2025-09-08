@@ -160,15 +160,21 @@ public class OpenAIMultimodalNarrativeService {
         }
         try {
             JsonNode root = objectMapper.readTree(text.trim());
+
+            // 1) caption
             String caption = Optional.ofNullable(root.path("caption").asText(null)).orElse("").trim();
 
+            // 2) summary (직접 필드가 없으면 캡션에서 자동 추출 시도)
+            String summary = Optional.ofNullable(root.path("summary").asText(null)).orElse("").trim();
+
+            // 3) hashtags
             String hashtagsRaw = root.path("hashtags").asText(null);
             List<String> hashtags = parseHashtags(hashtagsRaw);
 
-            return new NarrativeResult(caption, hashtags);
+            return new NarrativeResult(caption, summary, hashtags);
         } catch (Exception e) {
             log.warn("JSON 파싱 실패, 원문 반환 시도: {}", e.toString());
-            return new NarrativeResult(text == null ? "" : text.trim(), Collections.emptyList());
+            return new NarrativeResult(text == null ? "" : text.trim(), text.trim(), Collections.emptyList());
         }
     }
 

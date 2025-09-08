@@ -1,19 +1,11 @@
 package hackathon.kb.chakchak.domain.product.api.controller;
 
 import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
-import hackathon.kb.chakchak.domain.product.api.dto.ProductMetaRequest;
-import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveRequest;
-import hackathon.kb.chakchak.domain.product.api.dto.ProductSaveResponse;
-import hackathon.kb.chakchak.domain.product.api.dto.ProductProgressResponseDto;
+import hackathon.kb.chakchak.domain.product.api.dto.*;
 import hackathon.kb.chakchak.domain.product.domain.dto.ProductReadResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.enums.Category;
 import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
-import hackathon.kb.chakchak.domain.product.service.OpenAIMultimodalNarrativeService;
-import hackathon.kb.chakchak.domain.product.service.ProductBasicService;
-import hackathon.kb.chakchak.domain.product.service.ProductCommandService;
-import hackathon.kb.chakchak.domain.product.service.ProductNarrativeService;
-import hackathon.kb.chakchak.domain.product.service.ProductService;
-import hackathon.kb.chakchak.domain.product.service.dto.NarrativeResult;
+import hackathon.kb.chakchak.domain.product.service.*;
 import hackathon.kb.chakchak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +28,7 @@ public class ProductController {
 
     @Operation(summary = "gpt 문구 받아오기", description = "상품 정보를 토대로 gpt 피드 문구 및 태그를 받아옵니다.")
     @PostMapping("/narrative")
-    public BaseResponse<NarrativeResult> makeNarrative(
+    public BaseResponse<ProductMetaResponse> makeNarrative(
             @RequestBody ProductMetaRequest meta,
             @AuthenticationPrincipal MemberPrincipal principal
     ) {
