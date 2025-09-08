@@ -59,7 +59,7 @@ public class Product extends BaseEntity {
 	private BigDecimal price;
 
 	@Lob
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "LONGTEXT")
 	private String description;
 
 	@Lob
