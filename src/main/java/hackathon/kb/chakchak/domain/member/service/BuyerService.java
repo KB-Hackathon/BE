@@ -1,8 +1,8 @@
 package hackathon.kb.chakchak.domain.member.service;
 
 import hackathon.kb.chakchak.domain.member.api.dto.res.BuyerOrderListResponse;
-import hackathon.kb.chakchak.domain.member.domain.entity.Member;
-import hackathon.kb.chakchak.domain.member.repository.MemberRepository;
+import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
+import hackathon.kb.chakchak.domain.member.repository.BuyerRepository;
 import hackathon.kb.chakchak.domain.order.domain.entity.Order;
 import hackathon.kb.chakchak.domain.order.domain.dto.OrderResponseDto;
 import hackathon.kb.chakchak.domain.order.repository.OrderRepository;
@@ -22,13 +22,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class BuyerService {
 
-    private final MemberRepository memberRepository;
+    private final BuyerRepository buyerRepository;
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
 
 
     public BuyerOrderListResponse getOrderList(Long buyerId) {
-        Member buyer = memberRepository.findById(buyerId)
+        Buyer buyer = buyerRepository.findById(buyerId)
                 .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
 
         // SUCCESS, PENDING만
