@@ -8,10 +8,12 @@ import hackathon.kb.chakchak.domain.order.domain.dto.OrderResponseDto;
 import hackathon.kb.chakchak.domain.order.repository.OrderRepository;
 import hackathon.kb.chakchak.domain.product.api.dto.ProductProgressResponseDto;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
+import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
 import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
 import hackathon.kb.chakchak.domain.product.util.ProductToDtoMapper;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +32,7 @@ public class BuyerService {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
 
-
+    @Transactional(readOnly = true)
     public BuyerOrderListResponse getOrderList(Long buyerId) {
         Buyer buyer = buyerRepository.findById(buyerId)
                 .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
@@ -40,6 +43,8 @@ public class BuyerService {
         if (orders.isEmpty()) {
             return BuyerOrderListResponse.builder()
                     .orders(List.of())
+                    .successOrders(List.of())
+                    .pendingOrders(List.of())
                     .build();
         }
 
@@ -54,24 +59,36 @@ public class BuyerService {
                         .map(v -> new ProductProgressResponseDto(v.getId(), v.getOrderCount(), v.getPercentAchieved()))
                         .collect(Collectors.toMap(ProductProgressResponseDto::id, Function.identity()));
 
+        // 상태별 분류
+        List<OrderResponseDto> orderList = new ArrayList<>();
+        List<OrderResponseDto> successOrderList = new ArrayList<>();
+        List<OrderResponseDto> pendingOrderList = new ArrayList<>();
 
-        // DTO 매핑
-        List<OrderResponseDto> items = orders.stream().map(o -> {
+        for (Order o : orders) {
             Product p = o.getProduct();
-            // 상품에 대한 집계값
-            ProductProgressResponseDto progress = progressMap.get(p.getId());
-            return OrderResponseDto.builder()
+            ProductProgressResponseDto progress =
+                    progressMap.getOrDefault(p.getId(), new ProductProgressResponseDto(p.getId(), 0L, 0));
+
+            OrderResponseDto dto = OrderResponseDto.builder()
                     .orderId(o.getId())
                     .quantity(o.getQuantity())
                     .isSent(o.getIsSent())
                     .deliveryCode(o.getDeliveryCode())
-                    .orderStatus(o.getStatus())
                     .productPreview(ProductToDtoMapper.productToProductPreviewResponseDto(p, progress))
                     .build();
-        }).toList();
+
+            if (p.getStatus() == ProductStatus.SUCCESS) {
+                successOrderList.add(dto);
+            } else if (p.getStatus() == ProductStatus.PENDING) {
+                pendingOrderList.add(dto);
+            }
+            orderList.add(dto);
+        }
 
         return BuyerOrderListResponse.builder()
-                .orders(items)
+                .orders(orderList)
+                .successOrders(successOrderList)
+                .pendingOrders(pendingOrderList)
                 .build();
     }
 }
