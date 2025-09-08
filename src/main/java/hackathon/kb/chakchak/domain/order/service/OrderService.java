@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import hackathon.kb.chakchak.domain.escrow.service.EscrowService;
 import hackathon.kb.chakchak.domain.ledger.entity.TransactionType;
 import hackathon.kb.chakchak.domain.ledger.service.LedgerService;
 import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
@@ -35,6 +36,7 @@ public class OrderService {
 	private final CouponRepository couponRepository;
 	private final OrderRepository orderRepository;
 	private final LedgerService ledgerService;
+	private final EscrowService escrowService;
 
 	/**
 	 *
@@ -88,5 +90,7 @@ public class OrderService {
 		for (Order order : product.getOrders()) {
 			order.getCoupon().activeCoupon();
 		}
+
+		escrowService.terminateBuy(product);
 	}
 }
