@@ -16,7 +16,7 @@ public class RootController {
         return BaseResponse.OK("API Server Running");
     }
 
-    @RequestMapping("/**")
+    @GetMapping("favicon.ico")
     public BaseResponse<String> fallback(HttpServletRequest request) {
         return BaseResponse.ERROR(ResponseCode.NOT_FOUND, "No static resource: " + request.getRequestURI());
     }
