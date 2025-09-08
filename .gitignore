@@ -7,7 +7,7 @@ build/
 
 ### private info ###
 .env
-
+local-env
 ### STS ###
 .apt_generated
 .classpath

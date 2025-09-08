@@ -1,5 +1,7 @@
 package hackathon.kb.chakchak.domain.order.domain.entity;
 
+import java.math.BigDecimal;
+
 import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
 import hackathon.kb.chakchak.domain.order.domain.enums.OrderStatus;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
@@ -49,9 +51,10 @@ public class Order extends BaseEntity {
 	@Column(nullable = false)
 	private Short quantity;
 
-	// Todo: ledger 생성 후 추가
-	// @Column(nullable = false)
-	// private String transactionId;
+	@Column(nullable = false)
+	private String transactionId;
+
+	private BigDecimal price;
 
 	private Boolean isSent;
 
