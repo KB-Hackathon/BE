@@ -45,7 +45,8 @@ public class BuyerService {
                     .isSent(o.getIsSent())
                     .deliveryCode(o.getDeliveryCode())
                     .orderStatus(o.getStatus())
-                    .productPreview(ProductToDtoMapper.productToProductPreviewResponseDto(p, progress)) .build();
+                    .productPreview(ProductToDtoMapper.productToProductPreviewResponseDto(p, progress))
+                    .build();
         }).toList();
 
         return BuyerOrderListResponse.builder()
