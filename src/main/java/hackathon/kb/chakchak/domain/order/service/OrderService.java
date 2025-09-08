@@ -12,6 +12,7 @@ import hackathon.kb.chakchak.domain.order.api.dto.req.CouponOrderReq;
 import hackathon.kb.chakchak.domain.order.api.dto.res.CouponOrderRes;
 import hackathon.kb.chakchak.domain.order.domain.entity.Coupon;
 import hackathon.kb.chakchak.domain.order.domain.entity.Order;
+import hackathon.kb.chakchak.domain.order.domain.enums.OrderStatus;
 import hackathon.kb.chakchak.domain.order.repository.CouponRepository;
 import hackathon.kb.chakchak.domain.order.repository.OrderRepository;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
@@ -47,9 +48,11 @@ public class OrderService {
 			.product(product)
 			.buyer(buyer)
 			.quantity(couponOrderReq.getQuantity())
+			.status(OrderStatus.PAY_COMPLETE)
 			.build();
 
 		Coupon coupon = Coupon.builder()
+			.order(order)
 			.uuid(UUID.randomUUID().toString().replace("-", ""))
 			.expiration(LocalDate.now().plusYears(1L))
 			.build();
