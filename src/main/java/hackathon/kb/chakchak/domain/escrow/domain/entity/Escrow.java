@@ -39,9 +39,9 @@ public class Escrow extends BaseEntity {
 	@OneToMany(mappedBy = "escrow", fetch = FetchType.LAZY)
 	private List<EscrowHistory> escrowHistoryList;
 
-	private BigDecimal amount;
+	private BigDecimal amount = BigDecimal.ZERO;
 
-	private Boolean isSent;
+	private Boolean isSent = false;
 
 	private String sellerAccount;
 }
