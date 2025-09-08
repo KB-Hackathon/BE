@@ -128,8 +128,15 @@ public class ProductNarrativeService {
                 systemInstruction, userText, imageUrls
         );
 
+        // 6-1) GPT summary를 Product.tmpSummary 에 저장
+        if (nr != null && nr.getSummary() != null) {
+            product.changeTmpSummary(nr.getSummary().trim());
+            productRepository.save(product); // 트랜잭션 안이라 merge 동작
+        }
+
         // 7) 게시글(caption) 작성
         return generateProductMetaResponse(
+                product.getId(),
                 nr,
                 meta.getTitle(),
                 meta.getPrice(),
@@ -141,6 +148,7 @@ public class ProductNarrativeService {
     }
 
     private ProductMetaResponse generateProductMetaResponse(
+            Long productId,
             NarrativeResult nr,
             String title,
             BigDecimal price,
@@ -197,7 +205,7 @@ public class ProductNarrativeService {
             if (!isBlank(roadNameAddress)) sb.append(roadNameAddress.trim());
         }
 
-        return new ProductMetaResponse(sb.toString().trim(), hashtags);
+        return new ProductMetaResponse(productId, sb.toString().trim(), hashtags);
     }
 
     private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }

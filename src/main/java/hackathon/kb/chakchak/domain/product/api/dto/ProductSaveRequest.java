@@ -10,6 +10,9 @@ import java.util.List;
 
 @Data
 public class ProductSaveRequest {
+    @Schema(description = "상품 아이디", example = "1")
+    private Long productId;
+
     @Schema(description = "상품명", example = "콜드브루 몰트 크림")
     private String title;
 
