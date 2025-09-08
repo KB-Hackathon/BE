@@ -31,7 +31,7 @@ public class BuyerService {
         Member buyer = memberRepository.findById(buyerId)
                 .orElseThrow(() -> new BusinessException(ResponseCode.BUYER_NOT_FOUND));
 
-        // 전체 주문 + 상품 로딩
+        // SUCCESS, PENDING만
         List<Order> orders = orderRepository.findOrdersWithProductByBuyer(buyerId);
 
         // DTO 매핑
