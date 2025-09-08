@@ -77,6 +77,7 @@ public class OrderService {
 		orderRepository.save(order);
 		couponRepository.save(coupon);
 
+		product.getEscrow().plusAmount(totalPrice);
 		ledgerService.createAndSaveVoucherWithDoubleEntry(transactionId, TransactionType.TRANSFER, totalPrice);
 
 		return new CouponOrderRes(coupon.getUuid(), coupon.getExpiration());

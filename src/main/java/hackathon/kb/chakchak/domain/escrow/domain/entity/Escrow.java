@@ -44,4 +44,8 @@ public class Escrow extends BaseEntity {
 	private Boolean isSent = false;
 
 	private String sellerAccount;
+
+	public void plusAmount(BigDecimal amount) {
+		this.amount = this.amount.add(amount);
+	}
 }
