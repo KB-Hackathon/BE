@@ -13,10 +13,12 @@ import hackathon.kb.chakchak.domain.order.api.dto.res.CouponOrderRes;
 import hackathon.kb.chakchak.domain.order.service.OrderService;
 import hackathon.kb.chakchak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "ORDER API", description = "상품 주문 관련 API")
 @RequestMapping("/auth")
 public class OrderController {
 

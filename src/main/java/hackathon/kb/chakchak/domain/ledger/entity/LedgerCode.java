@@ -3,6 +3,8 @@ package hackathon.kb.chakchak.domain.ledger.entity;
 import hackathon.kb.chakchak.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,6 +27,8 @@ public class LedgerCode extends BaseEntity {
 	@Column(name = "ledger_code_id")
 	private Long ledgerCodeId;
 	private String name;
+
+	@Enumerated(EnumType.STRING)
 	private AccountType type;
 
 }
