@@ -23,8 +23,8 @@ public class ReportResponseDto {
 	private Integer successRate;
 
 	@Schema(description = "연령대 분포 (%)")
-	private Map<String, Integer> ageDistribution;
+	private ReportAgeDistributionResponse ageDistribution;
 
 	@Schema(description = "성별 분포 (%)")
-	private Map<String, Integer> genderDistribution;
+	private ReportGenderDistributionResponse genderDistribution;
 }

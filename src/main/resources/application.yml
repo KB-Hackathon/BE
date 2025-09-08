@@ -65,7 +65,7 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-validity-seconds: 1800 # 1800초 = 30분
+  access-token-validity-seconds: 259200 # 1800초 = 30분
   refresh-token-validity-seconds: 259200 # 259200초 = 3일
 
 auth:
