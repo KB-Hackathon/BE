@@ -74,7 +74,7 @@ public class Product extends BaseEntity {
 
 	private String couponName;
 
-	private LocalDateTime couponExpiration;
+	private Integer couponExpiration;
 
 	@Column(nullable = false)
 	private LocalDateTime recruitmentStartPeriod;
@@ -135,7 +135,7 @@ public class Product extends BaseEntity {
 			this.couponName = couponName;
 	}
 
-	public void changeCouponExpiration(LocalDateTime couponExpiration) {
+	public void changeCouponExpiration(Integer couponExpiration) {
 		if (couponExpiration != null)
 			this.couponExpiration = couponExpiration;
 	}
