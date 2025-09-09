@@ -101,45 +101,7 @@ public class Product extends BaseEntity {
 
 	private LocalDateTime refreshedAt;
 
-	// ====== 변경 메서드 (업데이트 전용) ======
-
-	public void changeEndCaptureId(Long id) {
-		this.endCaptureId = id;
-	}
-
-	public void changeDescription(String description) {
-		if (description != null)
-			this.description = description;
-	}
-
-	public void changePrice(BigDecimal price) {
-		if (price != null)
-			this.price = price;
-	}
-
-	// boolean 필드는 null-safe 입력 메서드로
-	public void changeCoupon(Boolean isCoupon) {
-		if (isCoupon != null)
-			this.isCoupon = isCoupon;
-	}
-
-	public void changeTargetAmount(Short targetAmount) {
-		if (targetAmount != null)
-			this.targetAmount = targetAmount;
-	}
-
-	public void changeRecruitmentPeriods(LocalDateTime start, LocalDateTime end) {
-		if (start != null)
-			this.recruitmentStartPeriod = start;
-		if (end != null)
-			this.recruitmentEndPeriod = end;
-	}
-
 	public void updateStatus(ProductStatus status) {
 		this.status = status;
-	}
-
-	public void touchRefreshedAt(LocalDateTime now) {
-		this.refreshedAt = now;
 	}
 }
