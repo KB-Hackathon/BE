@@ -22,7 +22,7 @@ public class ReportController {
 	private final ReportService reportService;
 
 	@Operation(summary = "리포트 조회", description = "나(판매자)의 리포트를 조회합니다.")
-	@GetMapping()
+	@GetMapping("/me")
 	public BaseResponse<ReportResponseDto> getReport(@AuthenticationPrincipal MemberPrincipal memberPrincipal) {
 		return BaseResponse.OK(reportService.getReportBySellerId(memberPrincipal.getId()));
 	}
