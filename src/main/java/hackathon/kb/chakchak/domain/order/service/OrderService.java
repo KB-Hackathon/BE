@@ -1,12 +1,5 @@
 package hackathon.kb.chakchak.domain.order.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import hackathon.kb.chakchak.domain.escrow.service.EscrowService;
 import hackathon.kb.chakchak.domain.ledger.entity.TransactionType;
 import hackathon.kb.chakchak.domain.ledger.service.LedgerService;
@@ -26,6 +19,12 @@ import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -72,7 +71,7 @@ public class OrderService {
 		Coupon coupon = Coupon.builder()
 			.order(order)
 			.uuid(UUID.randomUUID().toString().replace("-", ""))
-			.expiration(LocalDate.now().plusYears(1L))
+			.expiration(LocalDate.now().plusDays(product.getCouponExpiration()))
 			.build();
 
 		orderRepository.save(order);

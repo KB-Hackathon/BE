@@ -7,6 +7,9 @@ import java.util.List;
 
 @Builder
 public record ProductMetaResponse(
+        @Schema(description = "상품 아이디", example = "1")
+        Long productId,
+
         @Schema(description = "상품 상세 설명 (홍보글)", example = "여름의 시작을 알리는 특별한 순간...")
         String caption,
 

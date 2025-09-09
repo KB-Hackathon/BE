@@ -2,7 +2,10 @@ package hackathon.kb.chakchak.domain.report.domain.entity;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Seller;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -19,8 +22,7 @@ public class Report {
 	@JoinColumn(
 		name = "seller_id",
 		nullable = false,
-		unique = true,
-		foreignKey = @ForeignKey(name = "fk_report_seller")
+		unique = true
 	)
 	private Seller seller;
 

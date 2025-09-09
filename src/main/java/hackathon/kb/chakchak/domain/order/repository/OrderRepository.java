@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import hackathon.kb.chakchak.domain.member.domain.entity.Buyer;
-import hackathon.kb.chakchak.domain.order.domain.entity.Order;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +25,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 		FROM Order o
 		JOIN FETCH o.product p
 		WHERE o.buyer.id = :buyerId
+		  AND p.status IN (
+            hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus.SUCCESS,
+            hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus.PENDING
+          )
 		ORDER BY o.createdAt DESC
 	""")
 	List<Order> findOrdersWithProductByBuyer(@Param("buyerId") Long buyerId);

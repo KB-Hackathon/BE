@@ -44,6 +44,24 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	List<Product> findBySeller(Seller seller);
 
+	public interface ProductProgressView {
+		Long getId();
+		Long getOrderCount();
+		Integer getPercentAchieved();
+	}
+
+	@Query("""
+		SELECT
+			p.id AS id,
+			COUNT(o.id) AS orderCount,
+			CAST(ROUND((COUNT(o.id) * 100.0 / p.targetAmount), 0) AS int) AS percentAchieved
+		FROM Product p
+		LEFT JOIN p.orders o
+		WHERE p.id IN :productIds
+		GROUP BY p.id, p.targetAmount
+	""")
+	List<ProductProgressView> findProgressByProductIds(@Param("productIds") List<Long> productIds);
+
 	// 특정 상품(공동구매글)의 참여 인원과 달성률 조회
 	@Query("""
         SELECT

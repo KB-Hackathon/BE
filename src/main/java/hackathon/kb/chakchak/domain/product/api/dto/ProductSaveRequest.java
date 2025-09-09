@@ -10,6 +10,9 @@ import java.util.List;
 
 @Data
 public class ProductSaveRequest {
+    @Schema(description = "상품 아이디", example = "1")
+    private Long productId;
+
     @Schema(description = "상품명", example = "콜드브루 몰트 크림")
     private String title;
 
@@ -34,8 +37,8 @@ public class ProductSaveRequest {
     @Schema(description = "상품 쿠폰명", example = "콜드브루 몰트 1회 사용권")
     private String couponName;
 
-    @Schema(description = "쿠폰 유효기간 일시", example = "2025-10-05T00:00:00")
-    private LocalDateTime couponExpiration;
+    @Schema(description = "쿠폰 유효기간", example = "30")
+    private Integer couponExpiration;
 
     @Schema(description = "목표 수량", example = "100")
     private Short targetAmount;
