@@ -35,7 +35,8 @@ public class Product extends BaseEntity {
 	@BatchSize(size = 100)
 	private List<Order> orders;
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+	@BatchSize(size = 100)
 	private List<Image> images;
 
 	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
