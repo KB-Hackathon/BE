@@ -81,7 +81,7 @@ public class Product extends BaseEntity {
 	private String description;
 
 	@Enumerated(EnumType.STRING)
-	private ProductStatus status;
+	private ProductStatus status = ProductStatus.PENDING;
 
 	private Short targetAmount;
 
@@ -135,8 +135,8 @@ public class Product extends BaseEntity {
 			this.recruitmentEndPeriod = end;
 	}
 
-	public void markPending() {
-		this.status = ProductStatus.PENDING;
+	public void updateStatus(ProductStatus status) {
+		this.status = status;
 	}
 
 	public void touchRefreshedAt(LocalDateTime now) {

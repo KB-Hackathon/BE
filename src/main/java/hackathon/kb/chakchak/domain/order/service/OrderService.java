@@ -20,6 +20,7 @@ import hackathon.kb.chakchak.domain.order.domain.enums.OrderStatus;
 import hackathon.kb.chakchak.domain.order.repository.CouponRepository;
 import hackathon.kb.chakchak.domain.order.repository.OrderRepository;
 import hackathon.kb.chakchak.domain.product.domain.entity.Product;
+import hackathon.kb.chakchak.domain.product.domain.enums.ProductStatus;
 import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
 import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
 import hackathon.kb.chakchak.global.response.ResponseCode;
@@ -83,6 +84,10 @@ public class OrderService {
 		return new CouponOrderRes(coupon.getUuid(), coupon.getExpiration());
 	}
 
+	/**
+	 * 판매자의 쿠폰 공구 완료 로직
+	 * @param productId
+	 */
 	@Transactional
 	public void terminateCoupon(Long productId) {
 		Product product = productRepository.findById(productId)
@@ -93,5 +98,6 @@ public class OrderService {
 		}
 
 		escrowService.terminateBuy(product);
+		product.updateStatus(ProductStatus.SUCCESS);
 	}
 }
