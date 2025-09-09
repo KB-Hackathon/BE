@@ -47,6 +47,7 @@ public class ProductNarrativeService {
                 .category(meta.getCategory())
                 .price(BigDecimal.valueOf(0L)) // 기본값(업데이트 예정)
                 .description(meta.getSummary()) // 기본값(업데이트 예정)
+                .tmpSummary("") //기본값(업데이트 예정)
                 .status(ProductStatus.DRAFT) // 임시 상태
                 .targetAmount(null) // 기본값(업데이트 예정)
                 .recruitmentStartPeriod(now) // 기본값(업데이트 예정)
@@ -86,7 +87,7 @@ public class ProductNarrativeService {
         String systemInstruction = """
                 당신은 감성적인 인스타그램 카피라이터야.
                 아래 '카테고리 전용 가이드'와 '상품 정보'를 최대한 반영해,
-                아래 두 가지를 반드시 작성해줘.
+                아래 세 가지를 반드시 작성해줘.
                 
                 1) 스토리텔링 멘트
                 - 상품을 소개할 때 단순 나열 말고, 분위기·맛·경험을 담아내라.\s
