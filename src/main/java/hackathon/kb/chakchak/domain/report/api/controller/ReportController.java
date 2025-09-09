@@ -1,7 +1,8 @@
 package hackathon.kb.chakchak.domain.report.api.controller;
 
+import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,9 +21,9 @@ public class ReportController {
 
 	private final ReportService reportService;
 
-	@Operation(summary = "리포트 조회", description = "판매자 id로 리포트를 조회합니다.")
-	@GetMapping("/{sellerId}")
-	public BaseResponse<ReportResponseDto> getReport(@PathVariable Long sellerId) {
-		return BaseResponse.OK(reportService.getReportBySellerId(sellerId));
+	@Operation(summary = "리포트 조회", description = "나(판매자)의 리포트를 조회합니다.")
+	@GetMapping()
+	public BaseResponse<ReportResponseDto> getReport(@AuthenticationPrincipal MemberPrincipal memberPrincipal) {
+		return BaseResponse.OK(reportService.getReportBySellerId(memberPrincipal.getId()));
 	}
 }

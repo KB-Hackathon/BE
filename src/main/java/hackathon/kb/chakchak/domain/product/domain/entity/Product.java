@@ -63,7 +63,6 @@ public class Product extends BaseEntity {
 	private String description;
 
 	@Lob
-	@Column(nullable = false)
 	private String tmpSummary;
 
 	@Enumerated(EnumType.STRING)
