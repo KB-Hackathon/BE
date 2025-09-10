@@ -18,9 +18,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +33,13 @@ public class ProductImageOverlayService {
     private static final int BASE_TITLE = 43;
     private static final int BASE_SUB   = 34;
 
-    // 클램프(과도한 확대/축소 방지)
+    // 클램프
     private static final int MIN_TITLE = 12,  MAX_TITLE = 140;
     private static final int MIN_SUB   = 10,  MAX_SUB   = 120;
 
     // 폰트 후보
     private static final String[] FONT_CANDIDATES = {
-            "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "NanumGothic"
+            "Noto Sans CJK KR", "NanumGothic"
     };
 
     public String processFirstImage(String src, String companyName, String title, String line2) {
@@ -54,20 +53,14 @@ public class ProductImageOverlayService {
         }
     }
 
-    /** 이미지 로딩 → 2:3 크롭 → 폰트 스케일 → 폭 초과 시 2차 축소 → 하단 그라데이션 + 좌측 정렬 텍스트 → S3 업로드 */
-    private URL overlayBottomLeftScaled(String src,
-                                        String title, String subtitle) throws Exception {
-
-        // 1) 이미지 로드 (타임아웃)
+    /** 이미지 로딩 → 크롭 → 폰트 스케일 → 줄바꿈 처리 → 그라데이션/텍스트 → S3 업로드 */
+    private URL overlayBottomLeftScaled(String src, String title, String subtitle) throws Exception {
         BufferedImage img = readImageWithTimeout(src, 5000, 5000);
-
-        // 2) 2:3 비율로 크롭
         img = cropToTwoThree(img);
 
         int w = img.getWidth();
         int h = img.getHeight();
 
-        // 3) 해상도 기반 1차 스케일
         double scale = Math.min(w / (double) BASE_W, h / (double) BASE_H);
         int titleSize = clamp((int) Math.round(BASE_TITLE * scale), MIN_TITLE, MAX_TITLE);
         int subSize   = clamp((int) Math.round(BASE_SUB   * scale), MIN_SUB,   MAX_SUB);
@@ -75,38 +68,21 @@ public class ProductImageOverlayService {
         Font titleFont    = pickFont(FONT_CANDIDATES, Font.BOLD,  titleSize);
         Font subtitleFont = pickFont(FONT_CANDIDATES, Font.PLAIN, subSize);
 
-        // ===== 마진 설정 (여기서 조절) =====
-        int padLeft   = Math.max(40,  (int)Math.round(w * 0.05)); // 왼쪽 마진
-        int padRight  = Math.max(40,  (int)Math.round(w * 0.05)); // 오른쪽 마진
-        int padBottom = Math.max(40,  (int)Math.round(h * 0.05)); // 아래쪽 마진
-        int spacing   = Math.max(10,  h / 200);                   // 제목–부제 간격
-        // ==================================
+        int padLeft   = Math.max(40,  (int)Math.round(w * 0.05));
+        int padRight  = Math.max(40,  (int)Math.round(w * 0.05));
+        int padBottom = Math.max(40,  (int)Math.round(h * 0.05));
+        int spacing   = Math.max(10,  h / 200);
+        int lineGap   = Math.max(6,   subSize / 5);
+        int titleLineGap = Math.max(6, titleSize / 5);
 
-        // 텍스트 최대 폭: 좌/우 마진을 제외한 영역
         int maxWidthPx = w - padLeft - padRight;
 
-        // 미리 렌더링 컨텍스트로 실제 폭 측정
         Graphics2D gMeasure = img.createGraphics();
-        gMeasure.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         FontRenderContext frc = gMeasure.getFontRenderContext();
-
-        double titleWidth = stringWidth(titleFont, title, frc);
-        double subWidth   = (subtitle == null || subtitle.isBlank()) ? 0 : stringWidth(subtitleFont, subtitle, frc);
+        List<String> titleLines = wrapByWidth(safe(title), titleFont, frc, maxWidthPx);
+        List<String> subLines   = wrapByWidth(safe(subtitle), subtitleFont, frc, maxWidthPx);
         gMeasure.dispose();
 
-        double overRatio = 1.0;
-        if (titleWidth > maxWidthPx) overRatio = Math.max(overRatio, titleWidth / maxWidthPx);
-        if (subWidth   > maxWidthPx) overRatio = Math.max(overRatio, subWidth   / maxWidthPx);
-
-        if (overRatio > 1.0) {
-            double k = 0.98 / overRatio; // 살짝 여유
-            titleSize = clamp((int)Math.floor(titleSize * k), MIN_TITLE, MAX_TITLE);
-            subSize   = clamp((int)Math.floor(subSize   * k), MIN_SUB,   MAX_SUB);
-            titleFont    = titleFont.deriveFont((float) titleSize);
-            subtitleFont = subtitleFont.deriveFont((float) subSize);
-        }
-
-        // 5) 실제 그리기
         Graphics2D g = img.createGraphics();
         try {
             g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -116,36 +92,44 @@ public class ProductImageOverlayService {
             g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
             float titleH = textHeight(g, titleFont);
-            float subH   = (subtitle == null || subtitle.isBlank()) ? 0 : textHeight(g, subtitleFont);
+            float subH   = textHeight(g, subtitleFont);
 
-            // 그라데이션 바 높이 = 아래 패딩 + 텍스트(제목 + 부제 + 간격) + 아래 패딩
-            int textBlockH = Math.round(titleH + (subH > 0 ? (spacing + subH) : 0));
+            int titleBlockH = titleLines.isEmpty() ? 0
+                    : Math.round(titleLines.size() * titleH + Math.max(0, titleLines.size()-1) * titleLineGap);
+            int subBlockH = subLines.isEmpty() ? 0
+                    : Math.round(subLines.size() * subH + Math.max(0, subLines.size()-1) * lineGap);
+
+            int between = (!titleLines.isEmpty() && !subLines.isEmpty()) ? spacing : 0;
+            int textBlockH = subBlockH + between + titleBlockH;
             int barH = padBottom + textBlockH + padBottom;
             paintBottomGradient(g, w, h, barH);
 
-            // 베이스라인: 하단 마진 기준
             int baselineY = h - padBottom;
 
-            // 부제 (아래쪽)
-            if (subH > 0) {
+            if (!subLines.isEmpty()) {
                 g.setFont(subtitleFont);
                 float subStroke = Math.max(1.5f, subSize * 0.06f);
-                drawLeftAlignedOutlinedText(g, subtitle, padLeft, baselineY,
-                        Color.WHITE, new Color(0,0,0,170), subStroke);
-                baselineY -= Math.round(subH + spacing);
+                for (int i = subLines.size() - 1; i >= 0; i--) {
+                    drawLeftAlignedOutlinedText(g, subLines.get(i), padLeft, baselineY,
+                            Color.WHITE, new Color(0,0,0,170), subStroke);
+                    baselineY -= Math.round(subH + (i > 0 ? lineGap : 0));
+                }
+                baselineY -= between;
             }
 
-            // 제목 (그 위)
-            g.setFont(titleFont);
-            float titleStroke = Math.max(2.0f, titleSize * 0.07f);
-            drawLeftAlignedOutlinedText(g, title, padLeft, baselineY,
-                    Color.WHITE, new Color(0,0,0,200), titleStroke);
-
+            if (!titleLines.isEmpty()) {
+                g.setFont(titleFont);
+                float titleStroke = Math.max(2.0f, titleSize * 0.07f);
+                for (int i = titleLines.size() - 1; i >= 0; i--) {
+                    drawLeftAlignedOutlinedText(g, titleLines.get(i), padLeft, baselineY,
+                            Color.WHITE, new Color(0,0,0,200), titleStroke);
+                    baselineY -= Math.round(titleH + (i > 0 ? titleLineGap : 0));
+                }
+            }
         } finally {
             g.dispose();
         }
 
-        // 6) JPEG 인코딩 → S3 업로드
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(img, "jpg", os);
         byte[] bytes = os.toByteArray();
@@ -156,7 +140,6 @@ public class ProductImageOverlayService {
         return s3StorageService.uploadImages(mf);
     }
 
-    /** 왼쪽 정렬 + 외곽선 텍스트 */
     private void drawLeftAlignedOutlinedText(Graphics2D g, String text, int leftX, int baselineY,
                                              Color fillColor, Color strokeColor, float strokeWidth) {
         if (text == null || text.isBlank()) return;
@@ -168,15 +151,13 @@ public class ProductImageOverlayService {
         try {
             g2.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.setColor(strokeColor);
-            g2.draw(shape);          // 외곽선
             g2.setColor(fillColor);
-            g2.fill(shape);          // 내부 채움
+            g2.fill(shape);
         } finally {
             g2.dispose();
         }
     }
 
-    /** 하단에 투명 → 반투명 블랙 그라데이션 바 */
     private void paintBottomGradient(Graphics2D g, int width, int height, int barH) {
         GradientPaint gp = new GradientPaint(
                 0, height - barH, new Color(0,0,0,0),
@@ -188,36 +169,26 @@ public class ProductImageOverlayService {
         g.setPaint(old);
     }
 
-    /** 2:3 비율로 중앙 크롭 */
     private BufferedImage cropToTwoThree(BufferedImage src) {
         int w = src.getWidth();
         int h = src.getHeight();
-        double target = 2.0 / 3.0;     // width / height
-
+        double target = 3.0 / 4.0;
         int newW = w, newH = h;
         double cur = w / (double) h;
 
-        if (cur > target) newW = (int) Math.round(h * target);        // 가로가 더 넓음 → 가로 잘라냄
-        else              newH = (int) Math.round(w / target);        // 세로가 더 김 → 세로 잘라냄
+        if (cur > target) newW = (int) Math.round(h * target);
+        else              newH = (int) Math.round(w / target);
 
         int x = (w - newW) / 2;
         int y = (h - newH) / 2;
         return src.getSubimage(x, y, newW, newH);
     }
 
-    /** 텍스트 높이(= ascent + descent) */
     private float textHeight(Graphics2D g, Font f) {
         FontMetrics fm = g.getFontMetrics(f);
         return fm.getAscent() + fm.getDescent();
     }
 
-    /** 문자열 폭 */
-    private double stringWidth(Font f, String s, FontRenderContext frc) {
-        if (s == null || s.isBlank()) return 0;
-        return f.getStringBounds(s, frc).getWidth();
-    }
-
-    /** 가능한 폰트명을 순회하며 첫 가용 폰트를 고름 (없으면 Dialog 대체) */
     private Font pickFont(String[] candidates, int style, int size) {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         Set<String> installed = new HashSet<>(Arrays.asList(ge.getAvailableFontFamilyNames()));
@@ -227,7 +198,6 @@ public class ProductImageOverlayService {
         return new Font("Dialog", style, size);
     }
 
-    /** 네트워크 이미지 로드에 타임아웃 부여 */
     private BufferedImage readImageWithTimeout(String src, int connectMs, int readMs) throws Exception {
         if (src.startsWith("http://") || src.startsWith("https://")) {
             URLConnection conn = new URL(src).openConnection();
@@ -243,4 +213,51 @@ public class ProductImageOverlayService {
 
     private static int clamp(int v, int lo, int hi) { return Math.max(lo, Math.min(hi, v)); }
     private static String safe(String s) { return s == null ? "" : s; }
+
+    /** 문자열을 maxWidth에 맞춰 줄바꿈(공백 우선, 없으면 글자 단위) */
+    private List<String> wrapByWidth(String text, Font font, FontRenderContext frc, int maxWidthPx) {
+        List<String> lines = new ArrayList<>();
+        if (text == null) return lines;
+        String s = text.strip();
+        if (s.isEmpty()) return lines;
+
+        if (font.getStringBounds(s, frc).getWidth() <= maxWidthPx) {
+            lines.add(s);
+            return lines;
+        }
+
+        String[] tokens = s.split("\\s+");
+        StringBuilder cur = new StringBuilder();
+
+        for (String word : tokens) {
+            String candidate = (cur.length() == 0) ? word : cur + " " + word;
+            if (font.getStringBounds(candidate, frc).getWidth() <= maxWidthPx) {
+                cur.setLength(0);
+                cur.append(candidate);
+            } else {
+                if (cur.length() > 0) {
+                    lines.add(cur.toString());
+                    cur.setLength(0);
+                }
+                if (font.getStringBounds(word, frc).getWidth() <= maxWidthPx) {
+                    cur.append(word);
+                } else {
+                    StringBuilder piece = new StringBuilder();
+                    for (int i = 0; i < word.length(); i++) {
+                        String cand = piece.toString() + word.charAt(i);
+                        if (font.getStringBounds(cand, frc).getWidth() <= maxWidthPx) {
+                            piece.append(word.charAt(i));
+                        } else {
+                            if (piece.length() > 0) lines.add(piece.toString());
+                            piece.setLength(0);
+                            piece.append(word.charAt(i));
+                        }
+                    }
+                    cur.append(piece);
+                }
+            }
+        }
+        if (cur.length() > 0) lines.add(cur.toString());
+        return lines;
+    }
 }

@@ -182,7 +182,6 @@ public class ProductNarrativeService {
                 if (!isBlank(purchaseUrl)) {
                     sb.append(" 👉 [구매하기](").append(purchaseUrl.trim()).append(")");
                 }
-                sb.append("\n");
             } else if (!isBlank(purchaseUrl)) {
                 // 마감일이 없으면 링크만
                 sb.append("👉 [구매하기](").append(purchaseUrl.trim()).append(")");

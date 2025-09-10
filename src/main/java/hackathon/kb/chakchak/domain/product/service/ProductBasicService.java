@@ -42,7 +42,7 @@ public class ProductBasicService {
 		Pageable pageable = PageRequest.of(
 			page,
 			10,
-			Sort.by(Sort.Direction.DESC, "recruitmentStartPeriod", "id")
+			Sort.by(Sort.Direction.DESC, "createdAt", "id")
 		);
 
 		return productRepository
