@@ -114,4 +114,4 @@ juso:
   api-key: ${JUSO_ADMCD_API_KEY}
 
 base:
-  url: https://localhost:5173 #${BASE_URL}
+  url: ${BASE_URL}
