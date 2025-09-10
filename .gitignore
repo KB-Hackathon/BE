@@ -19,6 +19,7 @@ local-env
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+*Test*
 
 ### IntelliJ IDEA ###
 .idea
