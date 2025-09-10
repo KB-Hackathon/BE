@@ -62,7 +62,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
             response.addHeader(HttpHeaders.SET_COOKIE, cookieIssuer.build(refresh).toString());
 
-            String redirectUri = uri + "/auth/signIn/success";
+            String redirectUri = baseURI + "/auth/signIn/success";
             String redirectUrl = String.format("%s?access_token=%s", redirectUri, access);
             response.sendRedirect(redirectUrl);
             return;
@@ -72,7 +72,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String signupToken = jwtIssuer.createSignupToken(kakaoId);
         log.info("[SIGNUP] need more info. kakaoId={}", kakaoId);
 
-        String redirectUri = uri + "/auth/signUp/additional";
+        String redirectUri = baseURI + "/auth/signUp/additional";
         String redirectUrl = String.format("%s?signup_token=%s", redirectUri, signupToken);
         response.sendRedirect(redirectUrl);
 
