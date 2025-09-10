@@ -18,8 +18,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,10 @@ public class ProductImageOverlayService {
     private static final String[] FONT_CANDIDATES = {
             "Noto Sans CJK KR", "NanumGothic"
     };
+
+    // 확장자 후보
+    private static final Set<String> SUPPORTED_OUT = Set.of("jpg","jpeg","png");
+
 
     public String processFirstImage(String src, String companyName, String title, String line2) {
         String line1 = (companyName == null ? "" : companyName) + " | " + (title == null ? "" : title);
@@ -130,14 +136,35 @@ public class ProductImageOverlayService {
             g.dispose();
         }
 
+        // 인코딩(format은 src에서 결정) → S3 업로드
+        String ext = guessExtFromSrc(src);                 // "jpg" or "png"
+        String format = ext.equals("jpg") ? "jpg" : "png"; // ImageIO 포맷명
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ImageIO.write(img, "jpg", os);
+
+        // JPG는 알파가 없으므로 RGB로 변환
+        BufferedImage out = img;
+        if ("jpg".equals(ext)) {
+            BufferedImage rgb = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D gg = rgb.createGraphics();
+            gg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            gg.drawImage(img, 0, 0, Color.BLACK, null);
+            gg.dispose();
+            out = rgb;
+        }
+
+        ImageIO.write(out, format, os);
         byte[] bytes = os.toByteArray();
 
+        String baseName = stripExt(extractFileNameFromSrc(src));
+        String fileName = baseName + "-overlay." + ext;   // ← src 이름 기반
+        String contentType = mimeOf(ext);
+
         MultipartFile mf = new MockMultipartFile(
-                "file", "overlayed.jpg", "image/jpeg", new ByteArrayInputStream(bytes)
+                "file", fileName, contentType, new ByteArrayInputStream(bytes)
         );
+
         return s3StorageService.uploadImages(mf);
+
     }
 
     private void drawLeftAlignedOutlinedText(Graphics2D g, String text, int leftX, int baselineY,
@@ -260,4 +287,47 @@ public class ProductImageOverlayService {
         if (cur.length() > 0) lines.add(cur.toString());
         return lines;
     }
+
+    private String guessExtFromSrc(String src) {
+        try {
+            String path = src;
+            if (src.startsWith("http")) path = new java.net.URL(src).getPath();
+            int dot = path.lastIndexOf('.');
+            if (dot >= 0) {
+                String ext = path.substring(dot + 1).toLowerCase(Locale.ROOT);
+                int q = ext.indexOf('?'); if (q >= 0) ext = ext.substring(0, q);
+                int s = ext.indexOf(';'); if (s >= 0) ext = ext.substring(0, s);
+                if (SUPPORTED_OUT.contains(ext)) return ext.equals("jpeg") ? "jpg" : ext;
+            }
+        } catch (Exception ignore) {}
+        return "jpg"; // 알 수 없으면 JPG로
+    }
+
+    private String mimeOf(String ext) {
+        return "png".equals(ext) ? "image/png" : "image/jpeg";
+    }
+
+    private String extractFileNameFromSrc(String src) {
+        String path = src;
+        try {
+            if (src.startsWith("http")) path = new URL(src).getPath();
+        } catch (Exception ignore) {}
+
+        int slash = path.lastIndexOf('/');
+        String name = (slash >= 0) ? path.substring(slash + 1) : path;
+
+        int q = name.indexOf('?');   if (q >= 0)   name = name.substring(0, q);
+        int hash = name.indexOf('#');if (hash >= 0)name = name.substring(0, hash);
+
+        try { name = java.net.URLDecoder.decode(name, StandardCharsets.UTF_8.name()); }
+        catch (Exception ignore) {}
+
+        return (name == null || name.isBlank()) ? "image" : name;
+    }
+
+    private String stripExt(String name) {
+        int dot = name.lastIndexOf('.');
+        return (dot > 0) ? name.substring(0, dot) : name;
+    }
+
 }
