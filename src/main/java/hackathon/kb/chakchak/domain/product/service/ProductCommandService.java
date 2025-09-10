@@ -1,5 +1,12 @@
 package hackathon.kb.chakchak.domain.product.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import hackathon.kb.chakchak.domain.capture.domain.Capture;
 import hackathon.kb.chakchak.domain.capture.repository.CaptureRepository;
 import hackathon.kb.chakchak.domain.escrow.domain.entity.Escrow;
@@ -14,15 +21,7 @@ import hackathon.kb.chakchak.domain.product.domain.entity.Tag;
 import hackathon.kb.chakchak.domain.product.repository.ImageRepository;
 import hackathon.kb.chakchak.domain.product.repository.ProductRepository;
 import hackathon.kb.chakchak.domain.product.repository.TagRepository;
-import hackathon.kb.chakchak.global.exception.exceptions.BusinessException;
-import hackathon.kb.chakchak.global.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,23 +45,26 @@ public class ProductCommandService {
      */
     public ProductSaveResponse saveProduct(Long sellerId, ProductSaveRequest req) {
         // 생성 전 유효성 간단 체크
-        if (req == null) throw new IllegalArgumentException("요청이 비어 있습니다.");
-        if (req.getTitle() == null || req.getTitle().isBlank()) throw new IllegalArgumentException("title은 필수입니다.");
-        if (req.getPrice() == null) throw new IllegalArgumentException("price는 필수입니다.");
-        if (req.getDescription() == null || req.getDescription().isBlank()) throw new IllegalArgumentException("description은 필수입니다.");
+        if (req == null)
+            throw new IllegalArgumentException("요청이 비어 있습니다.");
+        if (req.getTitle() == null || req.getTitle().isBlank())
+            throw new IllegalArgumentException("title은 필수입니다.");
+        if (req.getPrice() == null)
+            throw new IllegalArgumentException("price는 필수입니다.");
+        if (req.getDescription() == null || req.getDescription().isBlank())
+            throw new IllegalArgumentException("description은 필수입니다.");
         if (req.getRecruitmentStartPeriod() == null || req.getRecruitmentEndPeriod() == null)
             throw new IllegalArgumentException("모집 기간(recruitmentStart/End)은 필수입니다.");
 
         // 판매자 로드
         Seller seller = sellerRepository.findById(sellerId)
-                .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다. id=" + sellerId));
+            .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다. id=" + sellerId));
 
         // 캡처 생성 → endCaptureId 세팅
         Long endCaptureId = captureRepository.save(new Capture()).getId();
 
         Product product = productRepository.findById(req.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("상품이 없습니다."));
-
+            .orElseThrow(() -> new IllegalArgumentException("상품이 없습니다."));
 
         // 엔티티 필드 변경 (dirty checking으로 update)
         product.changeDescription(req.getDescription());
@@ -79,7 +81,14 @@ public class ProductCommandService {
         product.changeCouponName(req.getCouponName());
         product.changeCouponExpiration(req.getCouponExpiration());
 
+        Escrow escrow = Escrow.builder()
+            .product(product)
 
+            .sellerAccount(seller.getAccountNumber())
+            .build();
+        escrowRepository.save(escrow);
+
+        product.updateEscrow(escrow);
         // 먼저 상품 저장 (FK 필요)
         productRepository.save(product);
 
@@ -87,13 +96,15 @@ public class ProductCommandService {
         if (req.getTags() != null) {
             List<Tag> tags = new ArrayList<>();
             for (String name : req.getTags()) {
-                if (name == null || name.isBlank()) continue;
+                if (name == null || name.isBlank())
+                    continue;
                 tags.add(Tag.builder()
-                        .product(product)
-                        .name(name.trim())
-                        .build());
+                    .product(product)
+                    .name(name.trim())
+                    .build());
             }
-            if (!tags.isEmpty()) tagRepository.saveAll(tags);
+            if (!tags.isEmpty())
+                tagRepository.saveAll(tags);
         }
 
         // 이미지 저장
@@ -102,36 +113,31 @@ public class ProductCommandService {
 
             for (int i = 0; i < req.getImages().size(); i++) {
                 String url = req.getImages().get(i);
-                if (url == null || url.trim().isEmpty()) continue;
+                if (url == null || url.trim().isEmpty())
+                    continue;
 
                 String finalUrl = url;
 
                 if (i == 0) {
                     // 첫 번째 이미지는 오버레이 처리
                     finalUrl = productImageOverlayService.processFirstImage(
-                            url,
-                            seller.getCompanyName(),
-                            req.getTitle(),
-                            product.getTmpSummary()
+                        url,
+                        seller.getCompanyName(),
+                        req.getTitle(),
+                        product.getTmpSummary()
                     );
                 }
 
                 images.add(Image.builder()
-                        .product(product)
-                        .url(finalUrl)
-                        .build());
+                    .product(product)
+                    .url(finalUrl)
+                    .build());
             }
 
             if (!images.isEmpty()) {
                 imageRepository.saveAll(images);
             }
         }
-
-        Escrow escrow = Escrow.builder()
-                .product(productRepository.findById(product.getId()).orElseThrow(() -> new BusinessException(ResponseCode.PRODUCT_NOT_FOUND)))
-                .sellerAccount(seller.getAccountNumber())
-                .build();
-        escrowRepository.save(escrow);
 
         return new ProductSaveResponse(product.getId());
     }

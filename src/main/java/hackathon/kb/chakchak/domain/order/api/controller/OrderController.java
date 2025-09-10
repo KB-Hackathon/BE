@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import hackathon.kb.chakchak.domain.auth.MemberPrincipal;
 import hackathon.kb.chakchak.domain.order.api.dto.req.CouponOrderReq;
+import hackathon.kb.chakchak.domain.order.api.dto.req.ProductTerminateReq;
 import hackathon.kb.chakchak.domain.order.api.dto.res.CouponOrderRes;
 import hackathon.kb.chakchak.domain.order.service.OrderService;
 import hackathon.kb.chakchak.global.response.BaseResponse;
@@ -36,8 +37,8 @@ public class OrderController {
 	@PostMapping("/seller/order/coupon/terminate")
 	@Operation(summary = "쿠폰 공동 구매 종료", description = "판매자가 쿠폰 공동 구매를 종료하고 공구에 참여한 사용자들에게 쿠폰이 발급됩니다.")
 	public ResponseEntity<BaseResponse<?>> end(@AuthenticationPrincipal MemberPrincipal principal,
-		@RequestBody Long productId) {
-		orderService.terminateCoupon(productId);
+		@RequestBody ProductTerminateReq req) {
+		orderService.terminateCoupon(req.productId());
 
 		return ResponseEntity.ok(BaseResponse.OK());
 	}

@@ -13,6 +13,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,10 +24,10 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
 @Table(name = "ledger_entry")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 public class LedgerEntry extends BaseEntity {
 
 	@Id
@@ -41,10 +43,18 @@ public class LedgerEntry extends BaseEntity {
 	private LedgerType ledgerType;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ledger_voucher_id", nullable = false)
+	@JoinColumn(name = "ledger_voucher_id")
 	private LedgerVoucher ledgerVoucher;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ledger_code_id", nullable = false)
+	@JoinColumn(name = "ledger_code_id")
 	private LedgerCode ledgerCode;
+
+	@Builder
+	public LedgerEntry(BigDecimal amount, LedgerType ledgerType, LedgerVoucher ledgerVoucher, LedgerCode ledgerCode) {
+		this.amount = amount;
+		this.ledgerType = ledgerType;
+		this.ledgerVoucher = ledgerVoucher;
+		this.ledgerCode = ledgerCode;
+	}
 }

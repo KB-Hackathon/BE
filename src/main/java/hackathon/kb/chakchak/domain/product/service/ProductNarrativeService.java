@@ -57,7 +57,7 @@ public class ProductNarrativeService {
                 .build();
 
         product = productRepository.save(product);
-        String purchaseUrl = "https://chakchak-nu.vercel.app/product/p" + product.getId();
+        String purchaseUrl = "https://chakchak-nu.vercel.app/product/" + product.getId();
 
         // 2) 이미지 URL
         List<String> imageUrls = meta.getImages();
