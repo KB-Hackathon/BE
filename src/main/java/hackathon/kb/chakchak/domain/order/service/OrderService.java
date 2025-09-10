@@ -1,5 +1,8 @@
 package hackathon.kb.chakchak.domain.order.service;
 
+import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
 import hackathon.kb.chakchak.domain.escrow.service.EscrowService;
 import hackathon.kb.chakchak.domain.ledger.entity.TransactionType;
 import hackathon.kb.chakchak.domain.ledger.service.LedgerService;
@@ -98,5 +101,20 @@ public class OrderService {
 
 		escrowService.terminateBuy(product);
 		product.updateStatus(ProductStatus.SUCCESS);
+	}
+
+	@Transactional(readOnly = true)
+	public BigDecimal priceSumOfYesterdayOrders(){
+		LocalDate yesterday = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
+		List<Order> allWithProductByCreatedDate = orderRepository.findAllWithProductByCreatedDate(yesterday);
+
+		BigDecimal productPrice = allWithProductByCreatedDate.get(0).getProduct().getPrice();
+
+		int orderQuantity = 0;
+
+		for (Order order : allWithProductByCreatedDate) {
+			orderQuantity += order.getQuantity();
+		}
+		return productPrice.multiply(new BigDecimal(orderQuantity));
 	}
 }

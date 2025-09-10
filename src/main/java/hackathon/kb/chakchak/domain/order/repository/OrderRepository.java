@@ -32,4 +32,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 		ORDER BY o.createdAt DESC
 	""")
 	List<Order> findOrdersWithProductByBuyer(@Param("buyerId") Long buyerId);
+
+	@Query("""
+        SELECT o
+        FROM Order o
+        JOIN FETCH o.product p
+        WHERE function('date', o.createdAt) = :targetDate
+    """)
+	List<Order> findAllWithProductByCreatedDate(@Param("targetDate") java.time.LocalDate targetDate);
 }

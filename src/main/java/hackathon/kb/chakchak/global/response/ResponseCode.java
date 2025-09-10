@@ -38,6 +38,9 @@ public enum ResponseCode {
   
 	// PRODUCT
 	PRODUCT_NOT_FOUND("PRO-001", HttpStatus.NOT_FOUND, "Product not found"),
+
+	// Ledger
+	LEDGER_VERIFY_FAIL("LED-001", HttpStatus.INTERNAL_SERVER_ERROR, "차대변 검증 배치 로직 실패."),
 	;
 
 	private final String code;
