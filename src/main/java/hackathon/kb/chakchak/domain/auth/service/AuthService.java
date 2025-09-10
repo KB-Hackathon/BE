@@ -21,12 +21,10 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,6 +125,9 @@ public class AuthService {
         // 토큰 발급
         String access = jwtIssuer.createAccessToken(saved.getId(), saved.getRole().name());
         String refresh = jwtIssuer.createRefreshToken(saved.getId());
+
+        // refresh 토큰 redis에 저장
+        redisUtil.set("refresh:" + saved.getId(), refresh);
 
         return new TokensResponse(access, refresh);
     }
