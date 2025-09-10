@@ -48,6 +48,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         Optional<Member> member = memberRepository.findByKakaoId(kakaoId);
         log.info("우리의 DB에서 해당 사용자가 존재하는지 확인합니다.: {}", member);
 
+        String uri = request.getParameter("redicet_uri");
+        log.info("uri: {}", uri);
+
         if (member.isPresent()) {
             Member m = member.get();
 
@@ -59,7 +62,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
             response.addHeader(HttpHeaders.SET_COOKIE, cookieIssuer.build(refresh).toString());
 
-            String redirectUri = baseURI + "/auth/signIn/success";
+            String redirectUri = uri + "/auth/signIn/success";
             String redirectUrl = String.format("%s?access_token=%s", redirectUri, access);
             response.sendRedirect(redirectUrl);
             return;
@@ -69,7 +72,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String signupToken = jwtIssuer.createSignupToken(kakaoId);
         log.info("[SIGNUP] need more info. kakaoId={}", kakaoId);
 
-        String redirectUri = baseURI + "/auth/signUp/additional";
+        String redirectUri = uri + "/auth/signUp/additional";
         String redirectUrl = String.format("%s?signup_token=%s", redirectUri, signupToken);
         response.sendRedirect(redirectUrl);
 
@@ -83,4 +86,3 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     }
 
 }
-
